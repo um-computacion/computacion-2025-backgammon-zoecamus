@@ -1,4 +1,4 @@
-class player:
+class Player:
 
     def __init__(self, name: str, color: str, direction: int):
         assert color in ("white", "black"), "color inválido"

@@ -5,7 +5,6 @@ from core.player import Player
 class TestPlayerBasics(unittest.TestCase):
     def test_construct_valid_white(self):
         p = Player("White", "white", -1)
-        # Acceso intencional a atributos con name mangling para asserts
         self.assertEqual(p._Player__name__, "White")
         self.assertEqual(p._Player__color__, "white")
         self.assertEqual(p._Player__direction__, -1)
@@ -21,14 +20,13 @@ class TestPlayerBasics(unittest.TestCase):
         r = repr(p)
         self.assertIn("Zoe", r)
         self.assertIn("white", r)
-        # formato esperado: Player(name='Zoe', color=white, dir=-1)
         self.assertTrue(r.startswith("Player(") and "dir=" in r)
 
 
 class TestPlayerValidations(unittest.TestCase):
     def test_invalid_color_raises(self):
         with self.assertRaises(AssertionError):
-            Player("Bad", "WHITE", -1)  # case-sensitive, solo 'white' o 'black'
+            Player("Bad", "WHITE", -1)  
         with self.assertRaises(AssertionError):
             Player("Bad", "amarillo", -1)
 
@@ -44,7 +42,6 @@ class TestPlayerValidations(unittest.TestCase):
 class TestPlayerAttributeConvention(unittest.TestCase):
     def test_instance_attributes_have_double_underscores(self):
         p = Player("Conv", "white", -1)
-        # Todos los atributos de instancia deben tener __prefijo__ y __sufijo__
         for attr in vars(p).keys():
             self.assertTrue(
                 attr.startswith("__") and attr.endswith("__"),

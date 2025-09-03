@@ -8,5 +8,7 @@ class Player:
         self.__color__ = color
         self.__direction__ = direction
 
+
     def __repr__(self):
         return f"Player(name={self.__name__!r}, color={self.__color__}, dir={self.__direction__})"
+

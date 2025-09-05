@@ -1,4 +1,4 @@
-from core.excepciones import InvalidColorError, InvalidDirectionError
+from excepciones.excepciones import InvalidColorError, InvalidDirectionError
 
 class Player:
 

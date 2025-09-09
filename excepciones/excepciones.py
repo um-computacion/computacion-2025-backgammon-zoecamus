@@ -13,3 +13,11 @@ class InvalidColorError(BackgammonError):
 class InvalidDirectionError(BackgammonError):
     """Se intentó asignar una dirección inválida a un jugador."""
     pass
+
+class InvalidDiceSidesError(BackgammonError):
+    """Se intentó crear un dado con cantidad de caras inválida para Backgammon."""
+    pass
+
+class InvalidDiceOverrideError(BackgammonError):
+    """El override de tirada no cumple con el formato/valores permitidos."""
+    pass

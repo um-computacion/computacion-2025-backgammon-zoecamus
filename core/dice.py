@@ -1,4 +1,3 @@
-# core/dice.py
 import random
 from typing import Iterable, List, Optional
 from excepciones.excepciones import InvalidDiceSidesError, InvalidDiceOverrideError

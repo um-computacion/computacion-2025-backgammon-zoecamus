@@ -85,9 +85,7 @@ class Board:
         return self.borne_off_count(player.color) == self.TOTAL_CHECKERS_PER_PLAYER
 
     def legal_moves(self, player: Player, dice_values):
-        """Se implementará en la próxima iteración."""
         return []
 
     def apply_move(self, player: Player, move):
-        """Se implementará en la próxima iteración (incluye hits, barra, borne-off)."""
         raise NotImplementedError("apply_move aún no implementado.")

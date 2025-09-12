@@ -43,7 +43,7 @@ class TestBoardStates(unittest.TestCase):
         self.assertFalse(self.b.has_won(self.black))
 
     def test_has_won_true_when_borne_off_15(self):
-        self.b._Board__borne_off_white__ = 15
+        self.b.__borne_off_white__ = 15
         self.assertTrue(self.b.has_won(self.white))
 
 class TestAttributeConvention(unittest.TestCase):

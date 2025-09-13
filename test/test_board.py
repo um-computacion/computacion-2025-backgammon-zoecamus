@@ -1,4 +1,3 @@
-# tests/test_board.py
 import unittest
 from core.board import Board
 from core.player import Player

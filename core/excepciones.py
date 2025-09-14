@@ -35,14 +35,6 @@ class NotYourCheckerError(BackgammonError):
     "El jugador intentó mover una ficha que no es suya"
     pass
 
-class NoMovesAvailableError(BackgammonError):
-    "No hay movimientos legales con la tirada actual"
-    pass
-
-class MustUseAllDiceError(BackgammonError):
-    "Había movimientos posibles y no se usaron todos los dados"
-    pass
-
 class ReentryRequiredError(BackgammonError):
     "El jugador tiene fichas en la barra y debe reingresarlas primero"
     pass

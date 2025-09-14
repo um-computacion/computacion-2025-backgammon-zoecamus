@@ -1,5 +1,11 @@
 from typing import Optional, Dict, List
 from core.player import Player
+from core.excepciones import (
+    InvalidMoveError, BlockedPointError, OutOfBoundsPointError,
+    NotYourCheckerError,
+    ReentryRequiredError, IllegalReentryPointError, BearOffNotAllowedError
+)
+
 
 class Board:
     TOTAL_CHECKERS_PER_PLAYER = 15
@@ -89,3 +95,53 @@ class Board:
 
     def apply_move(self, player: Player, move):
         raise NotImplementedError("apply_move aún no implementado.")
+    def __validate_point__(self, idx: int) -> None:
+        if not (0 <= idx <= 23):
+            raise OutOfBoundsPointError(f"Índice fuera de 0..23: {idx}")
+
+    def __is_blocked_for__(self, color: str, idx: int) -> bool:
+        cell = self.__points__[idx]
+        return bool(cell and cell["color"] != color and int(cell["count"]) >= 2)
+
+    def __ensure_can_enter__(self, color: str, dst_idx: int) -> None:
+        self.__validate_point__(dst_idx)
+        if self.__is_blocked_for__(color, dst_idx):
+            raise IllegalReentryPointError(f"Punto {dst_idx} bloqueado para reingreso")
+
+    def legal_moves(self, player, dice_values):
+        if self.bar_count(player.color) > 0:
+            return []
+
+
+    def apply_move(self, player, move):
+
+        color = player.color
+
+        # Reingreso requerido si hay fichas en barra
+        if self.bar_count(color) > 0:
+            kind = move[0] if isinstance(move, tuple) else None
+            if kind != "reentry":
+                raise ReentryRequiredError("Tenés fichas en la barra: reingresá primero.")
+
+        if isinstance(move, tuple) and len(move) == 2:
+            kind, arg = move[0], move[1]
+            if kind == "reentry":
+                self.__ensure_can_enter__(color, int(arg))
+            if kind == "bearoff":
+                if not self.in_home(player):
+                    raise BearOffNotAllowedError("No podés hacer bearing off si no estás en casa.")
+
+            src, dst = int(move[0]), int(move[1])
+            self.__validate_point__(src)
+            self.__validate_point__(dst)
+
+            src_cell = self.__points__[src]
+            if not src_cell or src_cell["color"] != color:
+                raise NotYourCheckerError(f"No hay ficha tuya en el punto {src}.")
+
+            if self.__is_blocked_for__(color, dst):
+                raise BlockedPointError(f"Destino {dst} bloqueado por el rival.")
+
+
+        raise InvalidMoveError(f"Formato de movimiento inválido: {move!r}")
+

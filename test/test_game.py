@@ -8,8 +8,8 @@ class TestGameBasics(unittest.TestCase):
     def setUp(self):
         self.board = MagicMock(name="BoardMock")
         self.dice = MagicMock(name="DiceMock")
-        self.white = Player("White", "white")   # direction inferido -1
-        self.black = Player("Black", "black")   # direction inferido +1
+        self.white = Player("White", "white")   # direccion inferido -1
+        self.black = Player("Black", "black")   # direccion inferido +1
         self.game = Game(self.board, self.white, self.black, self.dice)
 
     def test_initial_state(self):

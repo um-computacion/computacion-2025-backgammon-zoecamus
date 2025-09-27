@@ -10,3 +10,26 @@ def main():
     board = Board()
     dice = Dice()
     game = Game(board, white, black, dice)
+
+
+    while not game.winner:
+        print("\n-----------------------------------")
+        print(f"Turno de: {game.current_player.name} ({game.current_player.color})")
+
+        print("Opciones:")
+        print("1. Tirar los dados")
+        print("2. Salir")
+
+        opcion = input("Elegí una opción: ")
+
+        if opcion == "1":
+            valores = game.roll_dice()
+            print(f"Tirada de dados: {valores}")
+            game.end_turn()
+
+        elif opcion == "2":
+            print("Saliendo del juego...")
+            break
+
+        else:
+            print("Opción inválida. Intenta de nuevo.")

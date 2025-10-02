@@ -27,9 +27,23 @@ def main():
             print(f"Tirada de dados: {valores}")
             game.end_turn()
 
+        if opcion == "1":
+            valores = game.roll_dice()
+            print(f"Tirada de dados: {valores}")
+            print("\nTablero actual:")
+            print(board.render())   #los 24 puntos
+            game.end_turn()
+
+
         elif opcion == "2":
             print("Saliendo del juego...")
             break
 
         else:
             print("Opción inválida. Intenta de nuevo.")
+
+    if game.winner:
+        print(f"El jugador {game.winner.name} ha ganado.")
+
+if __name__ == "__main__":
+    main()

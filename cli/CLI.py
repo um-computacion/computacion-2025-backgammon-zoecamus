@@ -66,3 +66,7 @@ def main():
         elif opcion == "3":
             print("\nSaliendo del juego... ¡Gracias por jugar!")
             break
+
+        # Opción inválida
+        else:
+            print("\n Opción inválida. Intentá nuevamente.")

@@ -70,3 +70,12 @@ def main():
         # Opción inválida
         else:
             print("\n Opción inválida. Intentá nuevamente.")
+
+        # Fin de turno
+        if not game.winner:
+            input("\nPresioná ENTER para pasar de turno...")
+            game.end_turn()
+
+         # Fin del juego
+        if game.winner:
+            print(f"\n ¡El jugador {game.winner.name} ha ganado la partida!")

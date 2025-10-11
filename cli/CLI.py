@@ -79,3 +79,7 @@ def main():
          # Fin del juego
         if game.winner:
             print(f"\n ¡El jugador {game.winner.name} ha ganado la partida!")
+
+
+if __name__ == "__main__":
+    main()

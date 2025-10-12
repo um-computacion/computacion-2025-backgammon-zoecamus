@@ -60,6 +60,23 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
+        # Lógica de juego (por ahora no hay interacción)
+        jugador = game.current_player
+
+        # Dibujar pantalla
+        screen.fill(MARRON)
+        dibujar_tablero(screen)
+
+        # Texto del turno actual
+        texto_turno = fuente.render(f"Turno: {jugador.name} ({jugador.color})", True, BLANCO)
+        screen.blit(texto_turno, (20, 20))
+
+        # Actualizar
+        pygame.display.flip()
+        clock.tick(FPS)
+
+    pygame.quit()
+    sys.exit()
 
 if __name__ == "__main__":
     main()

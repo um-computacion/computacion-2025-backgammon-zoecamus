@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # exceptions/exceptions.py
 
 class BackgammonError(Exception):
@@ -21,7 +20,7 @@ class InvalidDiceSidesError(BackgammonError):
 
 class InvalidDiceOverrideError(BackgammonError):
     """El override de tirada no cumple con el formato/valores permitidos."""
-=======
+
 class BackgammonError(Exception):
     "Excepción base para el juego de Backgammon"
     pass
@@ -69,5 +68,4 @@ class IllegalReentryPointError(BackgammonError):
 
 class BearOffNotAllowedError(BackgammonError):
     "El jugador intentó sacar fichas sin tener todas en casa"
->>>>>>> 2dff8a1 (subo test player)
     pass

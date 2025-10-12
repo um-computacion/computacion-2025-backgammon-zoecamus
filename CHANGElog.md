@@ -28,3 +28,5 @@ commit 14/9/2025: importación e integración de excepciones en las clases (Play
 commit 15/9/2025: inicio de la documentación con el archivo JUSTIFICACION.md.
 
 En este commit y los siguientes me dediqué a la documentación del proyecto: justificación del diseño, clases y atributos, excepciones, estrategias de testing, además de la creación del archivo CHANGELOG.md para registrar la evolución del código. El próximo paso será completar el README.md como guía de uso e instalación.
+
+commit 26/9/2025: Empece con el codigo dek archivo CLI.py.

@@ -1,11 +1,10 @@
 from typing import Optional, Dict, List
 from core.player import Player
-from core.excepciones import (
+from excepciones.excepciones import (
     InvalidMoveError, BlockedPointError, OutOfBoundsPointError,
     NotYourCheckerError,
     ReentryRequiredError, IllegalReentryPointError, BearOffNotAllowedError
 )
-
 
 class Board:
     TOTAL_CHECKERS_PER_PLAYER = 15
@@ -144,4 +143,16 @@ class Board:
 
 
         raise InvalidMoveError(f"Formato de movimiento inválido: {move!r}")
+
+
+#TABLERO
+
+    def render(self) -> str:
+        filas = []
+        for i, cell in enumerate(self.__points__):
+            if cell:
+                filas.append(f"{i:02d}: {cell['color'][0].upper()} x{cell['count']}")
+            else:
+                filas.append(f"{i:02d}: vacío")
+        return "\n".join(filas)
 

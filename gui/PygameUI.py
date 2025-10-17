@@ -35,3 +35,59 @@ def dibujar_tablero(screen):
                   (i * ancho_punta + ancho_punta // 2, ALTO - alto_punta + 10)]
         pygame.draw.polygon(screen, color, puntos)
 
+
+
+def dibujar_fichas(screen, board):
+    """Dibuja las fichas según el estado del tablero."""
+    ancho_punta = ANCHO // 12
+    alto_punta = ALTO // 2
+    radio = 15
+
+    # Puntos de la barra
+    for i, punto in enumerate(board.points): 
+            if not punto:
+                continue
+
+
+            color = BLANCO if punto["color"] == "white" else NEGRO
+            cantidad = punto["count"]
+
+
+       # Determinar si está arriba (0-11) o abajo (12-23)
+            fila_superior = i < 12
+            base_y = 40 if fila_superior else ALTO - 40
+
+
+            for j in range(cantidad):
+                x = i * ancho_punta + ancho_punta // 2
+                y = base_y + (j * 2 * radio if not fila_superior else -j * 2 * radio)
+                pygame.draw.circle(screen, color, (x, y), radio)
+
+
+def main():
+   pygame.init()
+   screen = pygame.display.set_mode((ANCHO, ALTO))
+   pygame.display.set_caption("Backgammon - Pygame 🎲")
+   clock = pygame.time.Clock()
+
+
+   # Componentes del juego
+   board = Board()
+   white = Player("Jugador 1", "white")
+   black = Player("Jugador 2", "black")
+   dice = Dice()
+   game = Game(board, white, black, dice)
+
+
+   fuente = pygame.font.SysFont("Arial", 24)
+
+
+   running = True
+   while running:
+       for event in pygame.event.get():
+           if event.type == pygame.QUIT:
+               running = False
+
+
+
+

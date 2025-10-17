@@ -16,6 +16,10 @@ class Board:
         self.__borne_off_white__: int = 0
         self.__borne_off_black__: int = 0
 
+    @property
+    def points(self):
+        return self.__points__
+
     @staticmethod
     def _empty_points() -> List[Optional[Dict[str, object]]]:
         return [None for _ in range(24)]

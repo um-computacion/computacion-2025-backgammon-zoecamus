@@ -90,6 +90,8 @@ def main():
         screen.fill(MARRON)
         dibujar_tablero(screen)
         dibujar_fichas(screen, board)
+        dibujar_dados(screen, dice, fuente)
+
 
 
         # Mostrar turno actual

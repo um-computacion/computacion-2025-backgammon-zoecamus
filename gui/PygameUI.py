@@ -63,3 +63,27 @@ def dibujar_fichas(screen, board):
             x = i * ancho_punta + ancho_punta // 2
             y = base_y + (j * 2 * radio if not fila_superior else -j * 2 * radio)
             pygame.draw.circle(screen, color, (x, y), radio)
+
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode((ANCHO, ALTO))
+    pygame.display.set_caption("Backgammon - Pygame 🎲")
+    clock = pygame.time.Clock()
+
+    board = Board()
+    white = Player("Jugador 1", "white")
+    black = Player("Jugador 2", "black")
+    dice = Dice()
+    game = Game(board, white, black, dice)
+
+    fuente = pygame.font.SysFont("Arial", 24)
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        screen.fill(MARRON)
+        dibujar_tablero(screen)
+        dibujar_fichas(screen, board)

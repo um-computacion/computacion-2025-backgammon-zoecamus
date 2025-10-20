@@ -19,18 +19,22 @@ FPS = 60
 # =============================
 
 def dibujar_tablero(screen):
-    """Dibuja las 24 puntas del tablero."""
-    ancho_punta = ANCHO // 12
-    alto_punta = ALTO // 2
+    """Dibuja las 24 puntas del tablero con márgenes y marco."""
+    MARGEN = 50
+    ancho_punta = (ANCHO - 2 * MARGEN) // 12
+    alto_punta = (ALTO - 2 * MARGEN) // 2
+
+    # Fondo del tablero 
+    pygame.draw.rect(screen, (110, 60, 20), (MARGEN//2, MARGEN//2, ANCHO - MARGEN, ALTO - MARGEN), border_radius=10)
 
     for i in range(12):
         color = BEIGE if i % 2 == 0 else MARRON
 
         # Triángulos superiores
         puntos_superior = [
-            (i * ancho_punta, 0),
-            ((i + 1) * ancho_punta, 0),
-            (i * ancho_punta + ancho_punta // 2, alto_punta - 10)
+            (MARGEN + i * ancho_punta, MARGEN),
+            (MARGEN + (i + 1) * ancho_punta, MARGEN),
+            (MARGEN + i * ancho_punta + ancho_punta // 2, MARGEN + alto_punta)
         ]
         pygame.draw.polygon(screen, color, puntos_superior)
 

@@ -38,14 +38,13 @@ def dibujar_tablero(screen):
         ]
         pygame.draw.polygon(screen, color, puntos_superior)
 
-        # Triángulos inferiores
+               # Triángulos inferiores
         puntos_inferior = [
-            (i * ancho_punta, ALTO),
-            ((i + 1) * ancho_punta, ALTO),
-            (i * ancho_punta + ancho_punta // 2, ALTO - alto_punta + 10)
+            (MARGEN + i * ancho_punta, ALTO - MARGEN),
+            (MARGEN + (i + 1) * ancho_punta, ALTO - MARGEN),
+            (MARGEN + i * ancho_punta + ancho_punta // 2, ALTO - MARGEN - alto_punta)
         ]
         pygame.draw.polygon(screen, color, puntos_inferior)
-
 
 def dibujar_fichas(screen, board):
     """Dibuja las fichas según el estado del tablero."""

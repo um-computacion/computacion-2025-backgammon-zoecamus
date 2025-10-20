@@ -103,5 +103,21 @@ def main():
     pygame.quit()
     sys.exit()
 
+def dibujar_dados(screen, dice, fuente):
+    """Dos dados con sus valores."""
+    valores = dice.roll()  # tirada
+    dado_size = 60
+    espacio = 20
+    start_x = ANCHO // 2 - dado_size - espacio // 2
+    y = ALTO // 2 - dado_size // 2
+
+    for i, valor in enumerate(valores):
+        x = start_x + i * (dado_size + espacio)
+        pygame.draw.rect(screen, BLANCO, (x, y, dado_size, dado_size), border_radius=10)
+        texto = fuente.render(str(valor), True, NEGRO)
+        text_rect = texto.get_rect(center=(x + dado_size // 2, y + dado_size // 2))
+        screen.blit(texto, text_rect)
+
+
 if __name__ == "__main__":
     main()

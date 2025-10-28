@@ -67,10 +67,25 @@ def dibujar_fichas(screen, board):
             y = base_y + (j * 2 * radio if not fila_superior else -j * 2 * radio)
             pygame.draw.circle(screen, color, (x, y), radio)
 
+def dibujar_dados_fijos(screen, valores, fuente):
+    """Dibuja los dados con valores fijos (no cambian hasta clic)."""
+    dado_size = 60
+    espacio = 20
+    start_x = ANCHO // 2 - dado_size - espacio // 2
+    y = ALTO // 2 - dado_size // 2
+
+    for i, valor in enumerate(valores):
+        x = start_x + i * (dado_size + espacio)
+        pygame.draw.rect(screen, BLANCO, (x, y, dado_size, dado_size), border_radius=10)
+        texto = fuente.render(str(valor), True, NEGRO)
+        text_rect = texto.get_rect(center=(x + dado_size // 2, y + dado_size // 2))
+        screen.blit(texto, text_rect)
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((ANCHO, ALTO))
-    pygame.display.set_caption("Backgammon - Pygame 🎲")
+    pygame.display.set_caption("Backgammon - Pygame ")
     clock = pygame.time.Clock()
 
     board = Board()
@@ -80,6 +95,8 @@ def main():
     game = Game(board, white, black, dice)
 
     fuente = pygame.font.SysFont("Arial", 24)
+    valores_dados = [1, 1]  # valores iniciales
+    boton_rect = pygame.Rect(ANCHO//2 - 80, ALTO - 80, 160, 50)
 
     running = True
     while running:
@@ -87,23 +104,33 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
+            #  Clic en el botón "Tirar dados"
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if boton_rect.collidepoint(event.pos):
+                    valores_dados = dice.roll()  # nueva tirada
+
+        # Fondo
         screen.fill(MARRON)
         dibujar_tablero(screen)
         dibujar_fichas(screen, board)
-        dibujar_dados(screen, dice, fuente)
+        dibujar_dados_fijos(screen, valores_dados, fuente)
 
-
-
-        # Mostrar turno actual
+        #  Mostrar turno actual
         jugador = game.current_player
         texto_turno = fuente.render(f"Turno: {jugador.name} ({jugador.color})", True, BLANCO)
         screen.blit(texto_turno, (20, 20))
+
+        #  Botón
+        pygame.draw.rect(screen, BEIGE, boton_rect, border_radius=8)
+        texto_boton = fuente.render("Tirar dados", True, NEGRO)
+        screen.blit(texto_boton, texto_boton.get_rect(center=boton_rect.center))
 
         pygame.display.flip()
         clock.tick(FPS)
 
     pygame.quit()
     sys.exit()
+
 
 def dibujar_dados(screen, dice, fuente):
     """Dos dados con sus valores."""

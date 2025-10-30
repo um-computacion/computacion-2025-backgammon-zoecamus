@@ -54,7 +54,7 @@ def main():
                 src = int(input("\nDesde punto (0-23): "))
                 dst = int(input("Hasta punto (0-23): "))
                 board.apply_move(game.current_player, (src, dst))
-                print(" Movimiento realizado correctamente.")
+                print(f" Movimiento realizado correctamente. Desde punto {src} hasta punto {dst}.")
                 mostrar_tablero(board)
 
             except ValueError:

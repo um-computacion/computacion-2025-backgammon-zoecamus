@@ -16,7 +16,6 @@ class Board:
         __borne_off_white__: Cantidad de fichas blancas sacadas
         __borne_off_black__: Cantidad de fichas negras sacadas
     """
-    
     TOTAL_CHECKERS_PER_PLAYER = 15
 
     def __init__(self):
@@ -178,7 +177,6 @@ class Board:
         """
         if not (0 <= idx <= 23):
             raise OutOfBoundsPointError(f"Índice fuera de 0..23: {idx}")
-
     def __is_blocked_for__(self, color, idx):
         """
         Verifica si un punto está bloqueado para un color.
@@ -263,7 +261,6 @@ class Board:
                 if 0 <= dest <= 23:
                     if not self.__is_blocked_for__(color, dest):
                         moves.append((point_idx, dest))
-
         return moves
 
     def __calculate_entry_point__(self, color, die_value):
@@ -289,7 +286,7 @@ class Board:
     def __can_bear_off_from__(self, point, die_value, color, direction):
         """
         Verifica si se puede hacer bearing off desde un punto con un valor de dado.
-        
+
         Args:
             point: Punto origen
             die_value: Valor del dado

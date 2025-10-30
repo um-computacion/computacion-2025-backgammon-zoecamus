@@ -1,5 +1,4 @@
 name: CI with Coverage
-
 on:
   push:
     branches:
@@ -10,7 +9,6 @@ jobs:
 
     #Evitar bucle infinito
     if: github.actor != 'github-actions[bot]'
-
     permissions:
       contents: write
       pull-requests: write

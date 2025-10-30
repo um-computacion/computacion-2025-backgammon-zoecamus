@@ -17,7 +17,7 @@ class Game:
         __last_roll__: Última tirada de dados realizada
     """
 
-    def __init__(self, board: Board, white: Player, black: Player, dice: Dice):
+    def __init__(self, board, white, black, dice):
         """
         Inicializa una partida de Backgammon.
         
@@ -36,7 +36,7 @@ class Game:
         self.__last_roll__ = None
 
     @property
-    def current_player(self) -> Player:
+    def current_player(self):
         """
         Retorna el jugador que tiene el turno actual.
         
@@ -46,7 +46,7 @@ class Game:
         return self.__current_player__
 
     @property
-    def winner(self) -> Player | None:
+    def winner(self):
         """
         Retorna el jugador ganador de la partida.
         
@@ -56,7 +56,7 @@ class Game:
         return self.__winner__
 
     @property
-    def last_roll(self) -> list[int] | None:
+    def last_roll(self):
         """
         Retorna la última tirada de dados realizada.
         
@@ -65,7 +65,7 @@ class Game:
         """
         return self.__last_roll__
 
-    def roll_dice(self) -> list[int]:
+    def roll_dice(self):
         """
         Tira los dados y almacena el resultado.
         
@@ -75,7 +75,7 @@ class Game:
         self.__last_roll__ = self.__dice__.roll()
         return self.__last_roll__
 
-    def legal_moves(self) -> list:
+    def legal_moves(self):
         """
         Obtiene los movimientos legales para el jugador actual.
         
@@ -87,7 +87,7 @@ class Game:
             return []
         return self.__board__.legal_moves(self.__current_player__, self.__last_roll__)
 
-    def make_move(self, move) -> None:
+    def make_move(self, move):
         """
         Ejecuta un movimiento en el tablero y verifica si hay ganador.
         
@@ -98,7 +98,7 @@ class Game:
         if self.__board__.has_won(self.__current_player__):
             self.__winner__ = self.__current_player__
 
-    def end_turn(self) -> None:
+    def end_turn(self):
         """
         Finaliza el turno actual y pasa al siguiente jugador.
         Limpia la última tirada de dados.

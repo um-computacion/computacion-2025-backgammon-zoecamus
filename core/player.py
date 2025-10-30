@@ -14,7 +14,7 @@ class Player:
 
     __VALID_COLORS__ = ("white", "black")
 
-    def __init__(self, name: str, color: str, direction: int | None = None, uid: str | None = None):
+    def __init__(self, name, color, direction=None, uid=None):
         """
         Inicializa un jugador de Backgammon.
         
@@ -44,7 +44,7 @@ class Player:
         self.__uid__ = uid
 
     @property
-    def name(self) -> str:
+    def name(self):
         """
         Retorna el nombre del jugador.
         
@@ -54,7 +54,7 @@ class Player:
         return self.__name__
 
     @property
-    def color(self) -> str:
+    def color(self):
         """
         Retorna el color de las fichas del jugador.
         
@@ -64,7 +64,7 @@ class Player:
         return self.__color__
 
     @property
-    def direction(self) -> int:
+    def direction(self):
         """
         Retorna la dirección de movimiento del jugador.
         
@@ -74,7 +74,7 @@ class Player:
         return self.__direction__
 
     @property
-    def uid(self) -> str | None:
+    def uid(self):
         """
         Retorna el identificador único del jugador.
         
@@ -83,7 +83,7 @@ class Player:
         """
         return self.__uid__
 
-    def home_range(self) -> range:
+    def home_range(self):
         """
         Retorna el rango de puntos que conforman la casa del jugador.
         
@@ -92,7 +92,7 @@ class Player:
         """
         return range(0, 6) if self.__color__ == "white" else range(18, 24)
 
-    def opponent_color(self) -> str:
+    def opponent_color(self):
         """
         Retorna el color del oponente.
         
@@ -101,7 +101,7 @@ class Player:
         """
         return "black" if self.__color__ == "white" else "white"
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         """
         Retorna una representación en string del jugador.
         
@@ -110,7 +110,7 @@ class Player:
         """
         return f"Player(name={self.__name__!r}, color={self.__color__}, dir={self.__direction__}, uid={self.__uid__!r})"
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other):
         """
         Compara dos jugadores por igualdad.
         
@@ -125,4 +125,3 @@ class Player:
         if self.__uid__ and other.__uid__:
             return self.__uid__ == other.__uid__
         return (self.__name__, self.__color__) == (other.__name__, other.__color__)
-    

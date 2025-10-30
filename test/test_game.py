@@ -8,8 +8,8 @@ class TestGameBasics(unittest.TestCase):
     def setUp(self):
         self.board = MagicMock(name="BoardMock")
         self.dice = MagicMock(name="DiceMock")
-        self.white = Player("White", "white")   # direccion inferido -1
-        self.black = Player("Black", "black")   # direccion inferido +1
+        self.white = Player("White", "white")
+        self.black = Player("Black", "black")
         self.game = Game(self.board, self.white, self.black, self.dice)
 
     def test_initial_state(self):
@@ -65,6 +65,20 @@ class TestAttributeConvention(unittest.TestCase):
                 attr.startswith("__") and attr.endswith("__"),
                 msg=f"Atributo sin __prefijo__/__sufijo__: {attr}"
             )
+
+
+class TestGameMakeMove(unittest.TestCase):
+    def setUp(self):
+        self.board = MagicMock()
+        self.dice = MagicMock()
+        self.white = Player("W", "white")
+        self.black = Player("B", "black")
+        self.game = Game(self.board, self.white, self.black, self.dice)
+
+    def test_make_move_without_winning(self):
+        self.board.has_won.return_value = False
+        self.game.make_move(("move",))
+        self.assertIsNone(self.game.winner)
 
 
 if __name__ == "__main__":

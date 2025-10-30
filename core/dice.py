@@ -1,5 +1,4 @@
 import random
-from typing import Iterable, List, Optional
 from excepciones.excepciones import InvalidDiceSidesError, InvalidDiceOverrideError
 
 
@@ -17,7 +16,7 @@ class Dice:
         __last_roll__: Última tirada realizada
     """
     
-    def __init__(self, seed: Optional[int] = None, sides: int = 6):
+    def __init__(self, seed=None, sides=6):
         """
         Inicializa los dados del juego.
         
@@ -32,10 +31,10 @@ class Dice:
             raise InvalidDiceSidesError(f"Backgammon usa dados de 6 caras, no {sides}.")
         self.__sides__ = sides
         self.__rng__ = random.Random(seed)
-        self.__next_override__: Optional[List[int]] = None
-        self.__last_roll__: Optional[List[int]] = None
+        self.__next_override__ = None
+        self.__last_roll__ = None
 
-    def roll(self) -> List[int]:
+    def roll(self):
         """
         Realiza una tirada de dados.
         
@@ -56,7 +55,7 @@ class Dice:
         self.__last_roll__ = list(vals)
         return self.__last_roll__
 
-    def set_next_override(self, values: Iterable[int]) -> None:
+    def set_next_override(self, values):
         """
         Configura un override para la próxima tirada (útil para testing).
         
@@ -73,7 +72,7 @@ class Dice:
         self.__next_override__ = vals
 
     @property
-    def last_roll(self) -> Optional[List[int]]:
+    def last_roll(self):
         """
         Retorna la última tirada realizada.
         
@@ -83,7 +82,7 @@ class Dice:
         """
         return None if self.__last_roll__ is None else list(self.__last_roll__)
 
-    def __consume_override__(self) -> List[int]:
+    def __consume_override__(self):
         """
         Consume el override configurado y lo limpia.
         
@@ -94,7 +93,7 @@ class Dice:
         self.__next_override__ = None
         return list(vals)
 
-    def __validate_override__(self, vals: List[int]) -> None:
+    def __validate_override__(self, vals):
         """
         Valida que un override tenga formato y valores correctos.
         

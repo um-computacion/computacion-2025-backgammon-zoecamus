@@ -1,0 +1,65 @@
+************* Module ./tests
+./tests:1:0: F0001: No module named ./tests (fatal)
+************* Module ./pygame_ui
+./pygame_ui:1:0: F0001: No module named ./pygame_ui (fatal)
+************* Module core.checker
+core/checker.py:180:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+core/checker.py:220:0: C0304: Final newline missing (missing-final-newline)
+core/checker.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+core/checker.py:5:7: W0718: Catching too general exception Exception (broad-exception-caught)
+core/checker.py:208:26: W0212: Access to a protected member __uid of a client class (protected-access)
+core/checker.py:209:33: W0212: Access to a protected member __uid of a client class (protected-access)
+core/checker.py:216:12: W0212: Access to a protected member __color of a client class (protected-access)
+core/checker.py:217:12: W0212: Access to a protected member __owner of a client class (protected-access)
+core/checker.py:218:12: W0212: Access to a protected member __point of a client class (protected-access)
+core/checker.py:219:12: W0212: Access to a protected member __state of a client class (protected-access)
+core/checker.py:2:0: W0611: Unused Player imported from core.player (unused-import)
+************* Module core.game
+core/game.py:109:0: C0304: Final newline missing (missing-final-newline)
+core/game.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+core/game.py:1:0: W0611: Unused Player imported from core.player (unused-import)
+core/game.py:2:0: W0611: Unused Board imported from core.board (unused-import)
+core/game.py:3:0: W0611: Unused Dice imported from core.dice (unused-import)
+************* Module core.board
+core/board.py:19:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:179:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+core/board.py:255:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:286:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:307:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:311:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:321:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:350:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:356:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:362:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:374:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:377:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:381:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:386:0: C0303: Trailing whitespace (trailing-whitespace)
+core/board.py:450:0: C0304: Final newline missing (missing-final-newline)
+core/board.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+core/board.py:324:4: R0912: Too many branches (21/12) (too-many-branches)
+core/board.py:324:4: R0915: Too many statements (56/50) (too-many-statements)
+core/board.py:1:0: W0611: Unused Player imported from core.player (unused-import)
+************* Module core.player
+core/player.py:111:0: C0301: Line too long (120/100) (line-too-long)
+core/player.py:127:0: C0304: Final newline missing (missing-final-newline)
+core/player.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+************* Module core.dice
+core/dice.py:18:0: C0303: Trailing whitespace (trailing-whitespace)
+core/dice.py:108:0: C0303: Trailing whitespace (trailing-whitespace)
+core/dice.py:113:0: C0303: Trailing whitespace (trailing-whitespace)
+core/dice.py:116:0: C0301: Line too long (104/100) (line-too-long)
+core/dice.py:118:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+core/dice.py:121:0: C0303: Trailing whitespace (trailing-whitespace)
+core/dice.py:122:0: C0304: Final newline missing (missing-final-newline)
+core/dice.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+************* Module cli.CLI
+cli/CLI.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+cli/CLI.py:1:0: C0103: Module name "CLI" doesn't conform to snake_case naming style (invalid-name)
+cli/CLI.py:14:0: C0116: Missing function or method docstring (missing-function-docstring)
+cli/CLI.py:21:0: C0116: Missing function or method docstring (missing-function-docstring)
+cli/CLI.py:25:0: C0116: Missing function or method docstring (missing-function-docstring)
+
+-----------------------------------
+Your code has been rated at 0.00/10
+

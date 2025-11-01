@@ -283,40 +283,40 @@ class Board:
         
         return entry if 0 <= entry <= 23 else None
 
-    def __can_bear_off_from__(self, point, die_value, color, direction):
-        """
-        Verifica si se puede hacer bearing off desde un punto con un valor de dado.
+    def __can_bear_off_from__(self, point_index, die, color, direction):
+        """Determina si una ficha puede ser retirada (bear off) según las reglas del Backgammon."""
+        points = self.__points__
 
-        Args:
-            point: Punto origen
-            die_value: Valor del dado
-            color: Color del jugador
-            direction: Dirección del jugador (-1 o 1)
-            
-        Returns:
-            True si se puede sacar la ficha
-        """
-        home = self.home_range_for(color)
-        if point not in home:
+        if color == "white" and direction == -1:
+            # Caso exacto
+            if point_index - die == -1:
+                return True
+            # Dado alto (por encima del rango de casa)
+            if point_index - die < -1:
+                # Verificar si quedan fichas más lejos (puntos más grandes)
+                for i in range(point_index + 1, 6):  # FIX: Verificar solo puntos MÁS LEJANOS
+                    if points[i] and points[i]["color"] == "white":
+                        return False
+                # No quedan fichas más lejos → se puede sacar
+                return True
             return False
 
-        dest = point + (die_value * direction)
-        
-        # Si el destino sale exactamente del tablero
-        if (color == "white" and dest < 0) or (color == "black" and dest > 23):
-            return True
-        
-        # Si el dado es más grande que lo necesario, verificar que no haya fichas más alejadas
-        if (color == "white" and dest < 0) or (color == "black" and dest > 23):
-            # Verificar que no haya fichas en puntos más lejanos
-            for i in home:
-                if (color == "white" and i > point) or (color == "black" and i < point):
-                    cell = self.__points__[i]
-                    if cell and cell["color"] == color:
+        elif color == "black" and direction == 1:
+            # Caso exacto
+            if point_index + die == 24:
+                return True
+            # Dado alto (por encima del rango de casa)
+            if point_index + die > 24:
+                # Verificar si quedan fichas más lejos (puntos más pequeños)
+                for i in range(18, point_index):
+                    if points[i] and points[i]["color"] == "black":
                         return False
-            return True
-        
+                return True
+            return False
+
         return False
+
+
 
     def apply_move(self, player, move):
         """

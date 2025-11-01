@@ -43,17 +43,17 @@ class Checker:
         if color not in self.__VALID_COLORS__:
             raise InvalidColorError(f"Color inválido en Checker: {color!r}")
 
-        self.__color = color
-        self.__owner = owner
-        self.__uid = uid
+        self.__color__ = color
+        self.__owner__ = owner
+        self.__uid__ = uid
 
         if point is None:
-            self.__point = None
-            self.__state = "bar"
+            self.__point__ = None
+            self.__state__ = "bar"
         else:
             self._validate_point(point)
-            self.__point = point
-            self.__state = "board"
+            self.__point__ = point
+            self.__state__ = "board"
 
     # === PROPERTIES ===
     @property
@@ -64,7 +64,7 @@ class Checker:
         Returns:
             "white" o "black"
         """
-        return self.__color
+        return self.__color__
 
     @property
     def owner(self):
@@ -74,7 +74,7 @@ class Checker:
         Returns:
             Objeto Player dueño de la ficha
         """
-        return self.__owner
+        return self.__owner__
 
     @property
     def point(self):
@@ -84,7 +84,7 @@ class Checker:
         Returns:
             Número de punto (0-23) o None si no está en tablero
         """
-        return self.__point
+        return self.__point__
 
     @property
     def state(self):
@@ -94,7 +94,7 @@ class Checker:
         Returns:
             "board", "bar" o "borne_off"
         """
-        return self.__state
+        return self.__state__
 
     @property
     def uid(self):
@@ -104,7 +104,7 @@ class Checker:
         Returns:
             UID de la ficha o None
         """
-        return self.__uid
+        return self.__uid__
 
     # === HELPERS DE ESTADO ===
     def is_on_board(self):
@@ -114,7 +114,7 @@ class Checker:
         Returns:
             True si está en un punto del tablero
         """
-        return self.__state == "board"
+        return self.__state__ == "board"
 
     def is_on_bar(self):
         """
@@ -123,7 +123,7 @@ class Checker:
         Returns:
             True si está en la barra (capturada)
         """
-        return self.__state == "bar"
+        return self.__state__ == "bar"
 
     def is_borne_off(self):
         """
@@ -132,7 +132,7 @@ class Checker:
         Returns:
             True si ya fue sacada (borne off)
         """
-        return self.__state == "borne_off"
+        return self.__state__ == "borne_off"
 
     # === ACCIONES ===
     def move_to(self, point):
@@ -145,25 +145,25 @@ class Checker:
         Raises:
             ValueError: Si la ficha ya fue sacada o el punto es inválido
         """
-        if self.__state == "borne_off":
+        if self.__state__ == "borne_off":
             raise ValueError("No se puede mover una ficha ya borne off.")
         self._validate_point(point)
-        self.__point = point
-        self.__state = "board"
+        self.__point__ = point
+        self.__state__ = "board"
 
     def send_to_bar(self):
         """
         Envía la ficha a la barra (captura).
         """
-        self.__point = None
-        self.__state = "bar"
+        self.__point__ = None
+        self.__state__ = "bar"
 
     def bear_off(self):
         """
         Saca la ficha del tablero (bearing off).
         """
-        self.__point = None
-        self.__state = "borne_off"
+        self.__point__ = None
+        self.__state__ = "borne_off"
 
     # === INTERNOS ===
     @staticmethod
@@ -189,8 +189,8 @@ class Checker:
             String con formato "Checker(color=..., owner=..., point=..., state=..., uid=...)"
         """
         return (
-            f"Checker(color={self.__color!r}, owner={self.__owner.name!r}, "
-            f"point={self.__point!r}, state={self.__state!r}, uid={self.__uid!r})"
+            f"Checker(color={self.__color__!r}, owner={self.__owner__.name!r}, "
+            f"point={self.__point__!r}, state={self.__state__!r}, uid={self.__uid__!r})"
         )
 
     def __eq__(self, other):
@@ -205,16 +205,16 @@ class Checker:
         """
         if not isinstance(other, Checker):
             return NotImplemented
-        if self.__uid and other.__uid:
-            return self.__uid == other.__uid
+        if self.__uid__ and other.__uid__:
+            return self.__uid__ == other.__uid__
         return (
-            self.__color,
-            self.__owner.name,
-            self.__point,
-            self.__state,
+            self.__color__,
+            self.__owner__.name,
+            self.__point__,
+            self.__state__,
         ) == (
-            other.__color,
-            other.__owner.name,
-            other.__point,
-            other.__state,
+            other.__color__,
+            other.__owner__.name,
+            other.__point__,
+            other.__state__,
         )

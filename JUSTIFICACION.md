@@ -1,88 +1,106 @@
-## Justificación de las clases elegidas
+# JUSTIFICACIÓN DEL PROYECTO BACKGAMMON
 
-- **Player:**  
-  Representa a cada jugador.  
-  **Responsabilidad:** encapsular nombre, color y dirección de movimiento.  
-  **Motivo:** evita duplicar lógica de jugador y facilita alternancia de turnos.
+## 1. Introducción
+El proyecto **Backgammon** fue desarrollado como parte del curso de *Computación 2025* con el objetivo de aplicar los principios de la programación orientada a objetos, buenas prácticas de diseño, encapsulamiento estricto y pruebas unitarias.
 
-- **Dice:**  
-  Modela los dados de seis caras.  
-  **Responsabilidad:** generar tiradas válidas y manejar casos especiales (dobles).  
-  **Motivo:** desacoplar la generación aleatoria de la lógica del juego.
-
-- **Board:**  
-  Representa los 24 puntos del tablero y el estado de las fichas.  
-  **Responsabilidad:** manejar la distribución inicial, las reglas de movimiento, capturas, reingresos y bearing off.  
-  **Motivo:** centralizar la lógica de validación y estado del juego.
-
-- **Game:**  
-  Orquesta la partida.  
-  **Responsabilidad:** controlar turnos, invocar tiradas de dados, delegar movimientos al tablero y detectar fin del juego.  
-  **Motivo:** aplicar separación entre la interfaz (CLI o GUI) y la lógica interna.
-
-- **Excepciones personalizadas:**  
-  Cada módulo define errores propios (ej. `InvalidMoveError`, `BlockedPointError`, `NotYourCheckerError`).  
-  **Motivo:** mejorar la trazabilidad de errores y simplificar los tests.
+El sistema implementa la lógica completa del juego Backgammon, permitiendo su ejecución tanto en modo **CLI (consola)** como en modo **Pygame (interfaz visual)**. Además, incorpora una jerarquía de excepciones personalizada y una estructura modular que facilita la mantenibilidad y extensibilidad del código.
 
 ---
 
-## Justificación de atributos principales
+## 2. Arquitectura general
+El proyecto sigue una **arquitectura modular** y desacoplada:
 
-| Clase | Atributo | Motivo |
-|-------|-----------|--------|
-| `Player` | `__name`, `__color`, `__direction` | Encapsulan información única e inmutable del jugador. |
-| `Dice` | `__values`, `__used` | Mantienen control de tiradas y dados disponibles. |
-| `Board` | `__points__`, `__bar`, `__borne_off` | Representan el estado completo del tablero según las reglas del juego. |
-| `Game` | `__current_player`, `__winner`, `__last_roll` | Facilitan el control de flujo de la partida. |
+- **core/** → Contiene la lógica central del juego (`Board`, `Player`, `Checker`, `Dice`, `Game`).
+- **cli/** → Implementa la interfaz por consola (`CLI.py`) para la interacción textual.
+- **gui/** → Incluye la interfaz gráfica (`PygameUI.py`) para visualizar el tablero y los movimientos.
+- **excepciones/** → Define las clases de error personalizadas y controladas.
+- **test/** → Incluye los tests unitarios con `unittest` y `MagicMock`.
 
----
-
-## Decisiones de diseño relevantes
-
-- **Encapsulamiento fuerte:** todos los atributos usan doble subrayado (`__attr`) para evitar acceso externo directo.
-- **Inicialización estandarizada:** el método `_initial_points()` del `Board` replica la disposición clásica de fichas del Backgammon real.
-- **Testing aislado:** uso de `unittest` y `MagicMock` para probar la clase `Game` sin depender de `Board` ni `Dice` reales.
-- **Separación entre lógica y presentación:** el motor del juego (`core/`) no depende de `CLI` ni `pygame_ui`, permitiendo reutilización del mismo backend.
+El flujo principal está coordinado por la clase `Game`, que administra el turno de los jugadores, las tiradas de dados (`Dice`) y las actualizaciones en el tablero (`Board`). Las interfaces (CLI y PygameUI) comunican las acciones del usuario con el motor de juego.
 
 ---
 
-## Excepciones y manejo de errores
+## 3. Diseño y Responsabilidades
+Cada clase cumple un rol específico bajo el principio de **responsabilidad única**:
 
-Jerarquía definida en `excepciones/excepciones.py`:
-
-| Módulo | Excepciones | Motivo |
-|--------|--------------|--------|
-| **Player** | `InvalidColorError`, `InvalidDirectionError` | Validan entrada de jugador. |
-| **Dice** | `InvalidDiceSidesError`, `InvalidDiceOverrideError` | Evitan estados inválidos. |
-| **Board** | `InvalidMoveError`, `BlockedPointError`, `OutOfBoundsPointError`, `NotYourCheckerError`, `BearOffNotAllowedError` | Garantizan que las reglas se cumplan. |
-| **Game** | `InvalidTurnError` | Controla coherencia del flujo de turnos. |
-
-**Justificación:** usar excepciones específicas mejora la depuración, claridad y cobertura en los tests.
-
----
-
-## Estrategias de testing y cobertura
-
-- Framework: `unittest`  
-- Se cubren:
-  - Inicialización y atributos de todas las clases principales.  
-  - Casos de uso válidos y excepciones.  
-  - Flujos de juego (`Game.make_move`, `Board.apply_move`).  
-  - Lógica de dados (`Dice.roll`, `Dice.use_die`).  
-  - Validación de encapsulamiento (`__attr`).
-
-- Uso de **Coverage.py** para medir líneas ejecutadas.  
-  Meta de cobertura: **≥ 90 %** (actualmente en optimización).
+| Clase | Rol principal | Interacciones |
+|--------|----------------|----------------|
+| `Game` | Coordina la partida y los turnos | `Board`, `Dice`,`Player` |
+| `Board` | Representa el tablero y reglas de movimiento | `Checker`, `Game` |
+| `Checker` | Modela las fichas individuales | `Board` |
+| `Player` | Representa a cada jugador y su color | `Game`, `Board` |
+| `Dice` | Genera valores aleatorios de tirada | `Game` |
+| `CLI` | Interfaz textual para ejecutar el juego | `Game` |
+| `PygameUI` | Interfaz visual basada en Pygame | `Game`, `Board` |
 
 ---
 
-## Cumplimiento de principios SOLID
+## 4. Convención de nombres de atributos
+En cumplimiento con los **requisitos del proyecto**, se adoptó una convención de **doble prefijo y sufijo** para los atributos internos, con el fin de reforzar el encapsulamiento y la visibilidad.
 
-| Principio | Aplicación |
-|------------|-------------|
-| **S (Single Responsibility)** | Cada clase tiene una única función clara. |
-| **O (Open/Closed)** | Métodos listos para extensión sin modificar base. |
-| **L (Liskov Substitution)** | Las instancias de `Player`, `Board`, `Dice` se intercambian sin romper dependencias. |
-| **I (Interface Segregation)** | La lógica del juego (`Game`) no obliga a implementar métodos innecesarios. |
-| **D (Dependency Inversion)** | `Game` depende de abstracciones (métodos públicos), no de implementaciones concretas. |
+| Estilo | Ejemplo | Justificación |
+|---------|----------|---------------|
+| `__atributo__` | `__color__`, `__points__`, `__board__` | Indica atributos encapsulados con prefijo y sufijo doble según el estándar del proyecto. |
 
+Este estilo garantiza un control estricto del acceso y evita conflictos entre módulos.
+
+---
+
+## 5. Manejo de Excepciones
+Las excepciones fueron diseñadas de forma jerárquica dentro del módulo `excepciones/`, asegurando un manejo controlado de errores.
+
+| Excepción | Descripción | Clase que la usa |
+|------------|--------------|------------------|
+| `InvalidMoveError` | Movimiento fuera de las reglas del juego | `Board` |
+| `NotYourCheckerError` | Intento de mover una ficha del oponente | `Board` |
+| `BlockedPointError` | Punto ocupado por fichas del adversario | `Board` |
+| `IllegalReentryPointError` | Reingreso inválido desde la barra | `Board` |
+
+---
+
+## 6. Pruebas y Cobertura
+El proyecto cuenta con un conjunto extenso de tests unitarios en la carpeta `test/`, cubriendo el 88% del código.  
+Se utilizó **`unittest`** junto con **`MagicMock`** para aislar componentes y simular comportamientos sin depender del azar ni del estado real del tablero.
+
+Ejemplo de mock aplicado:
+```python
+fake_dice = MagicMock()
+fake_dice.roll.return_value = [3, 5]
+
+Esto permitió verificar comportamientos de Game sin necesidad de ejecutar el tablero completo.
+
+## 7 Convenciones de estilo y calidad de código
+
+Se aplicó Pylint (v4.0.2) para asegurar un estilo consistente y legible. Tras correcciones de docstrings y espacios en blanco, se obtuvo una puntuación de 9.8/10.
+
+Ejemplo de correcciones realizadas:
+
+Eliminación de trailing whitespace.
+
+Homogeneización de nombres de atributos (__atributo__).
+
+Inclusión de docstrings en métodos públicos y privados.
+
+## 8. Interfaces: CLI y PygameUI
+CLI
+
+Provee una interfaz de texto clara, pensada para depuración y pruebas unitarias. Permite ejecutar el juego, tirar los dados y mover fichas desde consola.
+
+PygameUI
+
+Desarrollada con Pygame, ofrece una visualización completa del tablero. Representa cada punto, ficha y barra gráficamente, sincronizada con el estado de Board. Incluye un panel lateral con contador, turnos y estado del juego.
+
+##9. Principios de diseño aplicados
+
+Responsabilidad única: Cada clase tiene un rol definido.
+
+Bajo acoplamiento: Las dependencias se reducen usando mocks y propiedades.
+
+Encapsulamiento: Atributos protegidos con doble prefijo y sufijo.
+
+Extensibilidad: El diseño modular permite futuras ampliaciones (por ejemplo, modo en red o IA).
+
+## 10. Conclusión
+
+El desarrollo del Backgammon permitió aplicar conceptos de POO, testing, diseño modular y principios SOLID, logrando un sistema robusto, reutilizable y fácilmente mantenible.
+La integración de Pygame elevó el proyecto a un entorno interactivo y visual, reflejando fielmente la dinámica real del juego.

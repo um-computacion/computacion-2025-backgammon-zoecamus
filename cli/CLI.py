@@ -213,7 +213,7 @@ def main():
 
         # Opción inválida
         else:
-            print("❌ Opción inválida. Intentá nuevamente.")
+            print("Opción inválida. Intentá nuevamente.")
 
     if game.winner:
         print(f"\n ¡El jugador {game.winner.name} ha ganado la partida!")

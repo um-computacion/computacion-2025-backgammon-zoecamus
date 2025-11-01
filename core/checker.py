@@ -16,11 +16,11 @@ class Checker:
     - "borne_off": Sacada del tablero (ganada)
     
     Attributes:
-        __color: Color de la ficha ("white" o "black")
-        __owner: Jugador dueño de la ficha
-        __point: Punto del tablero donde está (None si no está en tablero)
-        __state: Estado actual de la ficha
-        __uid: Identificador único opcional
+        __color__: Color de la ficha ("white" o "black")
+        __owner__: Jugador dueño de la ficha
+        __point__: Punto del tablero donde está (None si no está en tablero)
+        __state__: Estado actual de la ficha
+        __uid__: Identificador único opcional
     """
 
     __VALID_COLORS__ = ("white", "black")

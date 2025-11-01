@@ -6,16 +6,29 @@ from core.dice import Dice
 from core.game import Game
 from excepciones.excepciones import BackgammonError
 
-# Colores
+# Colores - Paleta de marrones
 MARRON_OSCURO = (101, 67, 33)
+MARRON_MEDIO = (139, 90, 43)
 MARRON_CLARO = (205, 133, 63)
 BEIGE = (244, 164, 96)
-BLANCO = (255, 255, 255)
-NEGRO = (30, 30, 30)
-VERDE = (34, 139, 34)
-ROJO = (220, 20, 60)
-AZUL = (70, 130, 180)
-DORADO = (255, 215, 0)
+BEIGE_CLARO = (255, 228, 196)
+CREMA = (245, 222, 179)
+MARRON_TRIANGULO_1 = (160, 100, 50)
+MARRON_TRIANGULO_2 = (120, 80, 40)
+CAFE = (111, 78, 55)
+CHOCOLATE = (210, 105, 30)
+MARRON_TEXTO = (80, 50, 20)
+ARENA = (194, 178, 128)
+
+# Colores de acento (tonos tierra)
+TERRACOTA = (204, 119, 34)  # Para mensajes importantes
+OCRE = (204, 153, 51)  # Para selección
+MARRON_ROJIZO = (165, 42, 42)  # Para errores
+DORADO_SUAVE = (218, 165, 32)  # Para ganador
+
+# Fichas
+FICHA_CLARA = (255, 255, 255)  # Blanco puro
+FICHA_OSCURA = (30, 30, 30)    # Negro
 
 # Dimensiones
 ANCHO = 1400
@@ -33,8 +46,8 @@ def pedir_nombres():
     print("        BACKGAMMON ")
     print("="*50)
     
-    nombre1 = input("\nJugador 1 (blancas ⚪): ").strip() or "Jugador 1"
-    nombre2 = input("Jugador 2 (negras ⚫): ").strip() or "Jugador 2"
+    nombre1 = input("\nJugador 1 (claras): ").strip() or "Jugador 1"
+    nombre2 = input("Jugador 2 (oscuras): ").strip() or "Jugador 2"
     
     print(f"\n¡Empieza la partida!")
     print(f"{nombre1} vs {nombre2}\n")
@@ -48,7 +61,7 @@ class BackgammonUI:
     def __init__(self, nombre1, nombre2):
         pygame.init()
         self.screen = pygame.display.set_mode((ANCHO, ALTO))
-        pygame.display.set_caption(" Backgammon")
+        pygame.display.set_caption("Backgammon")
         self.clock = pygame.time.Clock()
         
         # Fuentes
@@ -67,7 +80,7 @@ class BackgammonUI:
         self.dados_disponibles = []
         self.punto_seleccionado = None
         self.mensaje = f"{nombre1}, haz click en 'TIRAR DADOS'"
-        self.color_mensaje = BLANCO
+        self.color_mensaje = CREMA
         
         self.running = True
         
@@ -148,12 +161,11 @@ class BackgammonUI:
                 if self.board.bar_count(self.game.current_player.color) > 0:
                     return -1
         
-        # Puntos del tablero - USAR LA MISMA LÓGICA QUE dibujar_triangulo
+        # Puntos del tablero
         y_medio = self.tablero_y + self.tablero_alto // 2
         
         if self.tablero_y <= y < y_medio:
             # SUPERIOR (puntos 11-0)
-            # Calcular columna visual (0-11)
             if x < self.bar_x:  # IZQUIERDA
                 col = int((x - self.tablero_x) // ANCHO_TRIANGULO)
             elif x >= self.bar_x + self.bar_ancho:  # DERECHA  
@@ -161,15 +173,12 @@ class BackgammonUI:
             else:
                 return None
             
-            # Convertir col a idx: idx = 11 - col (inverso de dibujar_triangulo)
             if 0 <= col <= 11:
                 idx = 11 - col
-                print(f"SUPERIOR: x={x}, col={col}, idx={idx}")
                 return idx
                 
         elif y >= y_medio:
             # INFERIOR (puntos 12-23)
-            # Calcular columna visual (0-11)
             if x < self.bar_x:  # IZQUIERDA
                 col = int((x - self.tablero_x) // ANCHO_TRIANGULO)
             elif x >= self.bar_x + self.bar_ancho:  # DERECHA
@@ -177,10 +186,8 @@ class BackgammonUI:
             else:
                 return None
             
-            # Convertir col a idx: idx = col + 12 (directo de dibujar_triangulo)
             if 0 <= col <= 11:
                 idx = col + 12
-                print(f"INFERIOR: x={x}, col={col}, idx={idx}")
                 return idx
         
         return None
@@ -209,96 +216,72 @@ class BackgammonUI:
                     dado = src + 1
                 else:
                     dado = 24 - src
-                # Buscar dado exacto o mayor
-                if dado in self.dados_disponibles:
-                    return dado
-                for d in sorted(self.dados_disponibles, reverse=True):
-                    if d >= dado:
-                        return d
+                return dado if dado in self.dados_disponibles else None
         return None
     
     def dibujar_tablero(self):
-        """Dibuja el tablero base."""
-        # Fondo
+        """Dibuja el tablero."""
         self.screen.fill(MARRON_OSCURO)
         
-        # Tablero
-        pygame.draw.rect(self.screen, MARRON_CLARO, 
-                        (self.tablero_x, self.tablero_y, self.tablero_ancho, self.tablero_alto))
-        
-        # Borde del tablero
-        pygame.draw.rect(self.screen, DORADO,
-                        (self.tablero_x, self.tablero_y, self.tablero_ancho, self.tablero_alto), 3)
-        
-        # Línea divisoria horizontal
-        y_medio = self.tablero_y + self.tablero_alto // 2
-        pygame.draw.line(self.screen, MARRON_OSCURO,
-                        (self.tablero_x, y_medio),
-                        (self.tablero_x + self.tablero_ancho, y_medio), 3)
-        
-        # Bar
-        pygame.draw.rect(self.screen, MARRON_OSCURO,
-                        (self.bar_x, self.bar_y, self.bar_ancho, self.bar_alto))
-        txt = self.font_big.render("BAR", True, DORADO)
-        txt_rect = txt.get_rect(center=(self.bar_x + self.bar_ancho//2, y_medio))
-        self.screen.blit(txt, txt_rect)
+        # Fondo del tablero
+        pygame.draw.rect(self.screen, BEIGE, (self.tablero_x, self.tablero_y, self.tablero_ancho, self.tablero_alto))
         
         # Triángulos
         for i in range(24):
             self.dibujar_triangulo(i)
+        
+        # Bar
+        pygame.draw.rect(self.screen, MARRON_CLARO, (self.bar_x, self.bar_y, self.bar_ancho, self.bar_alto))
+        txt = self.font_big.render("BAR", True, MARRON_TEXTO)
+        txt_rect = txt.get_rect(center=(self.bar_x + self.bar_ancho // 2, self.bar_y + self.bar_alto // 2))
+        self.screen.blit(txt, txt_rect)
+        
+        # Línea divisoria
+        y_medio = self.tablero_y + self.tablero_alto // 2
+        pygame.draw.line(self.screen, MARRON_OSCURO, (self.tablero_x, y_medio), (self.tablero_x + self.tablero_ancho, y_medio), 3)
     
     def dibujar_triangulo(self, idx):
-        """Dibuja un triángulo (punto)."""
-        if idx < 0 or idx > 23:
-            return
-        
-        # Calcular posición base
-        if idx <= 11:  # Superior
+        """Dibuja un triángulo del tablero."""
+        # Calcular posición
+        if idx <= 11:  # Superior (11→0)
             col = 11 - idx
             y_base = self.tablero_y
-            direccion = 1  # Apunta hacia abajo
-        else:  # Inferior
+            y_punta = y_base + ALTO_TRIANGULO
+            hacia_abajo = True
+        else:  # Inferior (12→23)
             col = idx - 12
             y_base = self.tablero_y + self.tablero_alto
-            direccion = -1  # Apunta hacia arriba
+            y_punta = y_base - ALTO_TRIANGULO
+            hacia_abajo = False
         
         # Ajustar X por el bar
         if col >= 6:
-            x_base = self.tablero_x + col * ANCHO_TRIANGULO + ESPACIO_BAR
+            x_izq = self.tablero_x + col * ANCHO_TRIANGULO + ESPACIO_BAR
         else:
-            x_base = self.tablero_x + col * ANCHO_TRIANGULO
+            x_izq = self.tablero_x + col * ANCHO_TRIANGULO
         
-        # Color alternado
-        color = BEIGE if idx % 2 == 0 else MARRON_OSCURO
+        x_der = x_izq + ANCHO_TRIANGULO
+        x_medio = (x_izq + x_der) // 2
         
         # Puntos del triángulo
-        if direccion == 1:  # Apunta abajo
-            puntos = [
-                (x_base, y_base),
-                (x_base + ANCHO_TRIANGULO, y_base),
-                (x_base + ANCHO_TRIANGULO // 2, y_base + ALTO_TRIANGULO)
-            ]
-        else:  # Apunta arriba
-            puntos = [
-                (x_base, y_base),
-                (x_base + ANCHO_TRIANGULO, y_base),
-                (x_base + ANCHO_TRIANGULO // 2, y_base - ALTO_TRIANGULO)
-            ]
+        if hacia_abajo:
+            puntos = [(x_izq, y_base), (x_der, y_base), (x_medio, y_punta)]
+        else:
+            puntos = [(x_izq, y_base), (x_der, y_base), (x_medio, y_punta)]
         
+        # Color alternado (tonos marrones)
+        color = MARRON_TRIANGULO_1 if (idx % 2 == 0) else MARRON_TRIANGULO_2
         pygame.draw.polygon(self.screen, color, puntos)
-        pygame.draw.polygon(self.screen, NEGRO, puntos, 2)
+        pygame.draw.aalines(self.screen, MARRON_OSCURO, True, puntos, 2)
         
         # Número del punto
-        txt = self.font_small.render(str(idx), True, 
-                                     NEGRO if color == BEIGE else BEIGE)
-        if direccion == 1:
-            txt_rect = txt.get_rect(center=(x_base + ANCHO_TRIANGULO//2, y_base + 15))
-        else:
-            txt_rect = txt.get_rect(center=(x_base + ANCHO_TRIANGULO//2, y_base - 15))
+        txt_color = CREMA if color == MARRON_TRIANGULO_2 else MARRON_TEXTO
+        txt = self.font_small.render(str(idx), True, txt_color)
+        txt_rect = txt.get_rect(center=(x_medio, y_base + 10 if hacia_abajo else y_base - 10))
         self.screen.blit(txt, txt_rect)
     
     def dibujar_fichas(self):
-        """Dibuja todas las fichas."""
+        """Dibuja todas las fichas en el tablero."""
         for idx in range(24):
             cell = self.board.points[idx]
             if not cell:
@@ -309,138 +292,149 @@ class BackgammonUI:
                 continue
             
             x, y = coords
-            color = BLANCO if cell["color"] == "white" else NEGRO
+            color = cell["color"]
             count = cell["count"]
             
-            # Dirección de apilado
-            if idx <= 11:  # Superior
-                dy = 30
-            else:  # Inferior
-                dy = -30
+            # Color de la ficha
+            ficha_color = FICHA_CLARA if color == "white" else FICHA_OSCURA
+            borde_color = (30, 30, 30) if color == "white" else (255, 255, 255)
             
-            # Dibujar hasta 5 fichas
-            max_show = min(count, 5)
-            for j in range(max_show):
-                y_ficha = y + j * dy
+            # Verificar si este punto está seleccionado
+            es_seleccionado = (self.punto_seleccionado == idx)
+            
+            # Dibujar hasta 5 fichas visibles
+            max_visible = min(count, 5)
+            radio = 22
+            espacio = 5
+            
+            for i in range(max_visible):
+                if idx <= 11:  # Superior
+                    y_ficha = y + i * (radio * 2 + espacio)
+                else:  # Inferior
+                    y_ficha = y - i * (radio * 2 + espacio)
                 
-                # Highlight si seleccionado
-                if self.punto_seleccionado == idx:
-                    pygame.draw.circle(self.screen, AZUL, (x, y_ficha), 27)
+                # Dibujar ficha
+                pygame.draw.circle(self.screen, ficha_color, (x, int(y_ficha)), radio)
+                pygame.draw.circle(self.screen, borde_color, (x, int(y_ficha)), radio, 2)
                 
-                pygame.draw.circle(self.screen, color, (x, y_ficha), 25)
-                pygame.draw.circle(self.screen, NEGRO, (x, y_ficha), 25, 2)
+                # Si está seleccionado, dibujar anillo SOLO en la última ficha (la más alta/visible)
+                if es_seleccionado and i == max_visible - 1:
+                    pygame.draw.circle(self.screen, OCRE, (x, int(y_ficha)), radio + 4, 4)
             
             # Número si hay más de 5
             if count > 5:
-                txt = self.font_big.render(str(count), True, ROJO)
-                txt_rect = txt.get_rect(center=(x, y + 2.5 * dy))
+                y_num = y + max_visible * (radio * 2 + espacio) if idx <= 11 else y - max_visible * (radio * 2 + espacio)
+                txt = self.font.render(f"+{count - 5}", True, TERRACOTA)
+                txt_rect = txt.get_rect(center=(x, int(y_num)))
                 self.screen.blit(txt, txt_rect)
     
     def dibujar_bar(self):
-        """Dibuja fichas en el bar."""
-        x_center = self.bar_x + self.bar_ancho // 2
+        """Dibuja las fichas en la barra."""
+        white_count = self.board.bar_count("white")
+        black_count = self.board.bar_count("black")
+        
+        radio = 22
+        x_bar = self.bar_x + self.bar_ancho // 2
+        
+        # Verificar si la barra está seleccionada
+        bar_seleccionado = (self.punto_seleccionado == -1)
         
         # Blancas (abajo)
-        count_w = self.board.bar_count("white")
-        if count_w > 0:
-            y_start = self.tablero_y + self.tablero_alto - 50
-            for j in range(min(count_w, 5)):
-                y = y_start - j * 30
-                if self.punto_seleccionado == -1 and self.game.current_player.color == "white":
-                    pygame.draw.circle(self.screen, AZUL, (x_center, y), 27)
-                pygame.draw.circle(self.screen, BLANCO, (x_center, y), 25)
-                pygame.draw.circle(self.screen, NEGRO, (x_center, y), 25, 2)
-            if count_w > 5:
-                txt = self.font.render(str(count_w), True, ROJO)
-                self.screen.blit(txt, (x_center - 10, y_start - 160))
+        if white_count > 0:
+            y_start = self.bar_y + self.bar_alto - 30
+            for i in range(min(white_count, 5)):
+                y = y_start - i * (radio * 2 + 5)
+                pygame.draw.circle(self.screen, (255, 255, 255), (x_bar, int(y)), radio)
+                pygame.draw.circle(self.screen, (30, 30, 30), (x_bar, int(y)), radio, 2)
+                # Anillo de selección SOLO en la ficha superior
+                if bar_seleccionado and self.game.current_player.color == "white" and i == min(white_count, 5) - 1:
+                    pygame.draw.circle(self.screen, OCRE, (x_bar, int(y)), radio + 4, 4)
+            if white_count > 5:
+                txt = self.font.render(f"+{white_count - 5}", True, CREMA)
+                txt_rect = txt.get_rect(center=(x_bar, y_start - 5 * (radio * 2 + 5) - 20))
+                self.screen.blit(txt, txt_rect)
         
         # Negras (arriba)
-        count_b = self.board.bar_count("black")
-        if count_b > 0:
-            y_start = self.tablero_y + 50
-            for j in range(min(count_b, 5)):
-                y = y_start + j * 30
-                if self.punto_seleccionado == -1 and self.game.current_player.color == "black":
-                    pygame.draw.circle(self.screen, AZUL, (x_center, y), 27)
-                pygame.draw.circle(self.screen, NEGRO, (x_center, y), 25)
-                pygame.draw.circle(self.screen, BLANCO, (x_center, y), 25, 2)
-            if count_b > 5:
-                txt = self.font.render(str(count_b), True, ROJO)
-                self.screen.blit(txt, (x_center - 10, y_start + 160))
+        if black_count > 0:
+            y_start = self.bar_y + 30
+            for i in range(min(black_count, 5)):
+                y = y_start + i * (radio * 2 + 5)
+                pygame.draw.circle(self.screen, (30, 30, 30), (x_bar, int(y)), radio)
+                pygame.draw.circle(self.screen, (255, 255, 255), (x_bar, int(y)), radio, 2)
+                # Anillo de selección SOLO en la ficha superior
+                if bar_seleccionado and self.game.current_player.color == "black" and i == min(black_count, 5) - 1:
+                    pygame.draw.circle(self.screen, OCRE, (x_bar, int(y)), radio + 4, 4)
+            if black_count > 5:
+                txt = self.font.render(f"+{black_count - 5}", True, CREMA)
+                txt_rect = txt.get_rect(center=(x_bar, y_start + 5 * (radio * 2 + 5) + 20))
+                self.screen.blit(txt, txt_rect)
     
     def dibujar_bearoff(self):
-        """Dibuja zonas de bear-off."""
-        # Blancas (abajo derecha)
-        pygame.draw.rect(self.screen, MARRON_CLARO,
-                        (self.bearoff_white_x, self.bearoff_white_y, 
-                         self.bearoff_ancho, self.bearoff_alto))
-        pygame.draw.rect(self.screen, DORADO,
-                        (self.bearoff_white_x, self.bearoff_white_y,
-                         self.bearoff_ancho, self.bearoff_alto), 3)
+        """Dibuja las zonas de bear-off."""
+        # Blancas
+        pygame.draw.rect(self.screen, MARRON_MEDIO, 
+                        (self.bearoff_white_x, self.bearoff_white_y, self.bearoff_ancho, self.bearoff_alto), 
+                        border_radius=10)
+        pygame.draw.rect(self.screen, BEIGE_CLARO, 
+                        (self.bearoff_white_x, self.bearoff_white_y, self.bearoff_ancho, self.bearoff_alto), 
+                        3, border_radius=10)
         
-        count_w = self.board.borne_off_count("white")
-        txt = self.font_big.render(str(count_w), True, BLANCO)
-        txt_rect = txt.get_rect(center=(self.bearoff_white_x + self.bearoff_ancho//2,
-                                        self.bearoff_white_y + self.bearoff_alto//2))
-        self.screen.blit(txt, txt_rect)
+        white_off = self.board.borne_off_count("white")
+        txt_w = self.font_big.render(str(white_off), True, CREMA)
+        txt_rect_w = txt_w.get_rect(center=(self.bearoff_white_x + self.bearoff_ancho // 2, 
+                                             self.bearoff_white_y + self.bearoff_alto // 2))
+        self.screen.blit(txt_w, txt_rect_w)
         
-        txt_out = self.font_small.render("OUT", True, DORADO)
-        self.screen.blit(txt_out, (self.bearoff_white_x + 20, self.bearoff_white_y + 10))
+        # Negras
+        pygame.draw.rect(self.screen, MARRON_MEDIO, 
+                        (self.bearoff_black_x, self.bearoff_black_y, self.bearoff_ancho, self.bearoff_alto), 
+                        border_radius=10)
+        pygame.draw.rect(self.screen, MARRON_OSCURO, 
+                        (self.bearoff_black_x, self.bearoff_black_y, self.bearoff_ancho, self.bearoff_alto), 
+                        3, border_radius=10)
         
-        # Negras (arriba derecha)
-        pygame.draw.rect(self.screen, MARRON_CLARO,
-                        (self.bearoff_black_x, self.bearoff_black_y,
-                         self.bearoff_ancho, self.bearoff_alto))
-        pygame.draw.rect(self.screen, DORADO,
-                        (self.bearoff_black_x, self.bearoff_black_y,
-                         self.bearoff_ancho, self.bearoff_alto), 3)
-        
-        count_b = self.board.borne_off_count("black")
-        txt = self.font_big.render(str(count_b), True, NEGRO)
-        txt_rect = txt.get_rect(center=(self.bearoff_black_x + self.bearoff_ancho//2,
-                                        self.bearoff_black_y + self.bearoff_alto//2))
-        self.screen.blit(txt, txt_rect)
-        
-        txt_out = self.font_small.render("OUT", True, DORADO)
-        self.screen.blit(txt_out, (self.bearoff_black_x + 20, self.bearoff_black_y + 10))
+        black_off = self.board.borne_off_count("black")
+        txt_b = self.font_big.render(str(black_off), True, MARRON_OSCURO)
+        txt_rect_b = txt_b.get_rect(center=(self.bearoff_black_x + self.bearoff_ancho // 2, 
+                                             self.bearoff_black_y + self.bearoff_alto // 2))
+        self.screen.blit(txt_b, txt_rect_b)
     
     def dibujar_panel(self):
-        """Dibuja panel de control."""
-        # Fondo panel
-        pygame.draw.rect(self.screen, (50, 50, 50),
-                        (self.panel_x, 0, self.panel_ancho, ALTO))
+        """Dibuja el panel lateral."""
+        # Fondo
+        pygame.draw.rect(self.screen, CAFE, (self.panel_x, 0, self.panel_ancho, ALTO))
         
-        # Jugador actual
-        p = self.game.current_player
-        emoji = "⚪" if p.color == "white" else "⚫"
-        txt = self.font_big.render(f"{emoji} {p.name}", True, DORADO)
-        self.screen.blit(txt, (self.panel_x + 10, 20))
+        # Título
+        txt_titulo = self.font_big.render("BACKGAMMON", True, DORADO_SUAVE)
+        self.screen.blit(txt_titulo, (self.panel_x + 10, 20))
         
-        # Botón tirar dados
-        color_tirar = VERDE if not self.dados_disponibles else (100, 100, 100)
-        pygame.draw.rect(self.screen, color_tirar, self.btn_tirar, border_radius=8)
-        txt = self.font.render("TIRAR DADOS", True, BLANCO)
-        txt_rect = txt.get_rect(center=self.btn_tirar.center)
-        self.screen.blit(txt, txt_rect)
+        # Turno actual
+        txt_turno = self.font.render(f"Turno: {self.game.current_player.name}", True, CREMA)
+        self.screen.blit(txt_turno, (self.panel_x + 10, 55))
         
-        # Botón pasar turno
-        color_pasar = ROJO if self.dados_disponibles else (100, 100, 100)
-        pygame.draw.rect(self.screen, color_pasar, self.btn_pasar, border_radius=8)
-        txt = self.font.render("PASAR TURNO", True, BLANCO)
-        txt_rect = txt.get_rect(center=self.btn_pasar.center)
-        self.screen.blit(txt, txt_rect)
+        # Botones
+        pygame.draw.rect(self.screen, CHOCOLATE, self.btn_tirar, border_radius=5)
+        txt_btn1 = self.font.render("TIRAR DADOS", True, CREMA)
+        txt_rect1 = txt_btn1.get_rect(center=self.btn_tirar.center)
+        self.screen.blit(txt_btn1, txt_rect1)
+        
+        color_pasar = MARRON_MEDIO if self.dados_disponibles else MARRON_OSCURO
+        pygame.draw.rect(self.screen, color_pasar, self.btn_pasar, border_radius=5)
+        txt_btn2 = self.font.render("PASAR TURNO", True, CREMA)
+        txt_rect2 = txt_btn2.get_rect(center=self.btn_pasar.center)
+        self.screen.blit(txt_btn2, txt_rect2)
         
         # Dados disponibles
         if self.dados_disponibles:
             y = 200
-            txt = self.font.render("Dados:", True, DORADO)
-            self.screen.blit(txt, (self.panel_x + 10, y))
+            txt_dados = self.font.render("Dados disponibles:", True, CREMA)
+            self.screen.blit(txt_dados, (self.panel_x + 10, y))
             
             for i, d in enumerate(self.dados_disponibles):
-                x = self.panel_x + 20 + (i % 2) * 65
+                x = self.panel_x + 15 + (i % 2) * 65
                 y_dado = y + 35 + (i // 2) * 65
-                pygame.draw.rect(self.screen, VERDE, (x, y_dado, 55, 55), border_radius=5)
-                txt_dado = self.font_big.render(str(d), True, BLANCO)
+                pygame.draw.rect(self.screen, TERRACOTA, (x, y_dado, 55, 55), border_radius=5)
+                txt_dado = self.font_big.render(str(d), True, CREMA)
                 txt_rect = txt_dado.get_rect(center=(x + 27, y_dado + 27))
                 self.screen.blit(txt_dado, txt_rect)
         
@@ -469,10 +463,10 @@ class BackgammonUI:
         if self.game.winner:
             overlay = pygame.Surface((ANCHO, ALTO))
             overlay.set_alpha(200)
-            overlay.fill((0, 0, 0))
+            overlay.fill((50, 30, 10))
             self.screen.blit(overlay, (0, 0))
             
-            txt = self.font_big.render(f"¡{self.game.winner.name} GANÓ!", True, DORADO)
+            txt = self.font_big.render(f"¡{self.game.winner.name} GANÓ!", True, DORADO_SUAVE)
             txt_rect = txt.get_rect(center=(ANCHO//2, ALTO//2))
             self.screen.blit(txt, txt_rect)
     
@@ -490,17 +484,17 @@ class BackgammonUI:
                 
                 if not moves:
                     self.mensaje = "Sin movimientos. Auto-pasando turno..."
-                    self.color_mensaje = ROJO
+                    self.color_mensaje = MARRON_ROJIZO
                     self.game.end_turn()
                     self.dados_disponibles = []
                 else:
                     bar_count = self.board.bar_count(self.game.current_player.color)
                     if bar_count > 0:
                         self.mensaje = f"Dados: {valores}. ¡Saca del BAR!"
-                        self.color_mensaje = ROJO
+                        self.color_mensaje = TERRACOTA
                     else:
                         self.mensaje = f"Dados: {valores}. ¡Mueve!"
-                        self.color_mensaje = VERDE
+                        self.color_mensaje = OCRE
             return
         
         # Botón pasar turno
@@ -510,7 +504,7 @@ class BackgammonUI:
                 self.dados_disponibles = []
                 self.punto_seleccionado = None
                 self.mensaje = f"Turno de {self.game.current_player.name}"
-                self.color_mensaje = BLANCO
+                self.color_mensaje = CREMA
             return
         
         # Clicks en el tablero
@@ -529,30 +523,29 @@ class BackgammonUI:
                 if punto == -1:
                     self.punto_seleccionado = -1
                     self.mensaje = "BAR seleccionado. Click destino"
-                    self.color_mensaje = AZUL
+                    self.color_mensaje = OCRE
                 else:
                     self.mensaje = "¡Primero saca del BAR!"
-                    self.color_mensaje = ROJO
+                    self.color_mensaje = MARRON_ROJIZO
             else:
                 if punto == -1:
                     self.mensaje = "BAR vacío"
-                    self.color_mensaje = ROJO
+                    self.color_mensaje = MARRON_ROJIZO
                 elif punto == -2:
                     self.mensaje = "Selecciona una ficha primero"
-                    self.color_mensaje = ROJO
+                    self.color_mensaje = MARRON_ROJIZO
                 else:
                     cell = self.board.points[punto]
-                    print(f"DEBUG: Punto {punto}, Cell: {cell}, Color jugador: {self.game.current_player.color}")
                     if cell and cell["color"] == self.game.current_player.color:
                         self.punto_seleccionado = punto
-                        self.mensaje = f"Punto {punto} seleccionado"
-                        self.color_mensaje = AZUL
+                        self.mensaje = f"Punto {punto} seleccionado. Click destino"
+                        self.color_mensaje = OCRE
                     else:
                         if cell:
-                            self.mensaje = f"Punto {punto} tiene {cell['color']}, tú eres {self.game.current_player.color}"
+                            self.mensaje = f"Punto {punto} no es tuyo"
                         else:
                             self.mensaje = f"Punto {punto} está vacío"
-                        self.color_mensaje = ROJO
+                        self.color_mensaje = MARRON_ROJIZO
         else:
             # Segunda selección (movimiento)
             moves = self.board.legal_moves(self.game.current_player, self.dados_disponibles)
@@ -576,24 +569,24 @@ class BackgammonUI:
                         self.dados_disponibles.remove(dado)
                         
                         if isinstance(move, tuple) and move[0] == "bearoff":
-                            self.mensaje = f"✓ Sacaste del {move[1]}"
+                            self.mensaje = f"✓ Sacaste del punto {move[1]}"
                         elif isinstance(move, tuple) and move[0] == "reentry":
-                            self.mensaje = f"✓ BAR → {punto}"
+                            self.mensaje = f"✓ BAR → punto {punto}"
                         else:
-                            self.mensaje = f"✓ {self.punto_seleccionado} → {punto}"
+                            self.mensaje = f"✓ Punto {self.punto_seleccionado} → {punto}"
                         
-                        self.color_mensaje = VERDE
+                        self.color_mensaje = OCRE
                         self.punto_seleccionado = None
                         
                         # Verificar ganador
                         if self.game.winner:
                             self.mensaje = f"¡{self.game.winner.name} GANÓ!"
-                            self.color_mensaje = DORADO
+                            self.color_mensaje = DORADO_SUAVE
                         # Auto-terminar si no hay dados
                         elif not self.dados_disponibles:
                             self.game.end_turn()
                             self.mensaje = f"Turno de {self.game.current_player.name}"
-                            self.color_mensaje = BLANCO
+                            self.color_mensaje = CREMA
                         # Auto-terminar si no hay movimientos
                         else:
                             moves = self.board.legal_moves(self.game.current_player, self.dados_disponibles)
@@ -601,18 +594,18 @@ class BackgammonUI:
                                 self.game.end_turn()
                                 self.dados_disponibles = []
                                 self.mensaje = "Sin más movimientos"
-                                self.color_mensaje = ROJO
+                                self.color_mensaje = MARRON_ROJIZO
                     else:
                         self.mensaje = "Error calculando dado"
-                        self.color_mensaje = ROJO
+                        self.color_mensaje = MARRON_ROJIZO
                         self.punto_seleccionado = None
                 except BackgammonError as e:
                     self.mensaje = f"Error: {str(e)[:30]}"
-                    self.color_mensaje = ROJO
+                    self.color_mensaje = MARRON_ROJIZO
                     self.punto_seleccionado = None
             else:
                 self.mensaje = "Movimiento ilegal"
-                self.color_mensaje = ROJO
+                self.color_mensaje = MARRON_ROJIZO
                 self.punto_seleccionado = None
     
     def run(self):

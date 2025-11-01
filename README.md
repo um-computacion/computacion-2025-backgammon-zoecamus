@@ -1,56 +1,44 @@
-# Backgammon en Python 
+#  Proyecto Backgammon — Computación 2025
 
-Este proyecto implementa una versión del juego de **Backgammon**, parte de la materia **Computación 2025**
+## Descripción
+Este proyecto implementa el juego **Backgammon** aplicando los principios de la **programación orientada a objetos (POO)**, pruebas unitarias y arquitectura modular.  
+El sistema permite jugar tanto desde consola (**CLI**) como desde una interfaz visual desarrollada con **Pygame**.
 
-El objetivo es aplicar principios de diseño orientado a objetos, manejo de excepciones, 
-testing y las prácticas de documentación
+## Estructura del Proyecto
+core/ → Lógica principal del juego (Board, Player, Dice, Game, Checker)
+cli/ → Interfaz de texto (CLI.py)
+gui/ → Interfaz visual en Pygame (PygameUI.py)
+excepciones/ → Jerarquía de errores personalizados
+test/ → Pruebas unitarias (unittest + MagicMock)
 
----
+## Instalación
 
-##  Requisitos del proyecto
-- Clases principales: `Player`, `Dice`, `Board`, `Game`
-- Carpeta `exceptions/` con jerarquía de errores propios
-- Convención de atributos con `__prefijo__/__sufijo__` en todas las clases
-- Archivos de documentación obligatorios:
-  - `JUSTIFICACION.md`
-  - `CHANGELOG.md`
-  - `prompts-desarrollo.md`
-  - `prompts-testing.md`
-  - `README.md`
+### 1 Crear entorno virtual
+bash
+python -m venv venv
+source venv/bin/activate  
 
----
+### 2 Instalar dependencias
+pip install -r requirements.txt
 
-##  Estructura de la carpeta
-core/
-    - `Player.py`
-    - `Excepciones.py`
-    - `Dice.py`
-    - `Board.py`
-    - `Game.py`     
-tests/
-    - `test_Player.py`
-    - `test_Dice.py`
-    - `test_Board.py`
-    - `test_Game.py`
-JUSTIFICACION.md     
-CHANGELOG.md       
-prompts-desarrollo.md
-prompts-documentacion.md
-prompts-testing.md
-README.md
+### Ejecución
+# por consola
+python -m cli.CLI
+# por Pygame
+python -m gui.PygameUI
 
----
+### tests
+# ejecutar todos los tests
+coverage run -m unittest discover
+# ver reporte de cobertura
+coverage report -m
+# ver reporte de pylint
+pylint core cli excepciones gui
 
-## Correr los tests
-Se utiliza unittest como framework de testing
-- python -m unittest discover 
-Los tests cubren: 
-- `Player`
-- `Dice`
-- `Board`
-- `Game`: flujo de turnos, tirada de dados, integración con Board y Dice usando MagicMock.
+### Estándares aplicados
 
----
+Encapsulamiento con prefijo y sufijo (__atributo__) según el requisito del proyecto
+
+"""ZOE CAMUS — COMPUTACIÓN 2025"""
 
 
-## Zoe Camus

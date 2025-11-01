@@ -1,603 +1,763 @@
-import pygame
 import sys
+import pygame
 from core.board import Board
 from core.player import Player
 from core.dice import Dice
 from core.game import Game
 from excepciones.excepciones import BackgammonError
 
-# Colores simples
-MARRON = (139, 69, 19)
-BEIGE = (245, 222, 179)
-BLANCO = (255, 255, 255)
-NEGRO = (0, 0, 0)
-VERDE = (50, 200, 50)
-ROJO = (200, 50, 50)
-AZUL = (100, 150, 255)
-GRIS = (120, 120, 120)
+# Colores
+MARRON_OSCURO = (101, 67, 33)
+MARRON_MEDIO = (139, 90, 43)
+MARRON_CLARO = (205, 133, 63)
+BEIGE = (244, 164, 96)
+BEIGE_CLARO = (255, 228, 196)
+CREMA = (245, 222, 179)
+MARRON_TRIANGULO_1 = (160, 100, 50)
+MARRON_TRIANGULO_2 = (120, 80, 40)
+CAFE = (111, 78, 55)
+CHOCOLATE = (210, 105, 30)
+MARRON_TEXTO = (80, 50, 20)
+ARENA = (194, 178, 128)
+
+TERRACOTA = (204, 119, 34)  # Para mensajes importantes
+OCRE = (204, 153, 51)  # Para selección
+MARRON_ROJIZO = (165, 42, 42)  # Para errores
+DORADO_SUAVE = (218, 165, 32)  # Para ganador
+
+# Fichas
+FICHA_CLARA = (255, 255, 255)  # Blanco
+FICHA_OSCURA = (30, 30, 30)  # Negro
 
 # Dimensiones
-ANCHO = 1200
-ALTO = 750
+ANCHO = 1400
+ALTO = 900
+MARGEN = 50
+ANCHO_TRIANGULO = 70
+ALTO_TRIANGULO = 280
+ESPACIO_BAR = 80
 FPS = 60
 
 
 def pedir_nombres():
-    """Pide los nombres por consola antes de abrir pygame."""
-    print("\n" + "="*50)
-    print("       🎲 BACKGAMMON 🎲")
-    print("="*50)
-    
-    nombre1 = input("\nNombre Jugador 1 (blancas ⚪): ").strip()
-    if not nombre1:
-        nombre1 = "Jugador 1"
-    
-    nombre2 = input("Nombre Jugador 2 (negras ⚫): ").strip()
-    if not nombre2:
-        nombre2 = "Jugador 2"
-    
-    print(f"\n¡Que comience {nombre1} vs {nombre2}!")
-    print("Cerrando consola, abriendo ventana...\n")
-    
+    """Pide nombres por consola."""
+    print("\n" + "=" * 50)
+    print("        BACKGAMMON ")
+    print("=" * 50)
+
+    nombre1 = input("\nJugador 1 (blancas): ").strip() or "Jugador 1"
+    nombre2 = input("Jugador 2 (negras): ").strip() or "Jugador 2"
+
+    print("\n¡Empieza la partida!")
+    print(f"{nombre1} vs {nombre2}\n")
+
     return nombre1, nombre2
 
 
-class BackgammonSimple:
-    """Versión simple de Backgammon con Pygame."""
-    
+class BackgammonUI:
+    """Interfaz gráfica de Backgammon."""
+
     def __init__(self, nombre1, nombre2):
-        """Inicializa el juego."""
         pygame.init()
-        self.screen = pygame.display.set_mode((ANCHO, ALTO))
+        self.__screen__ = pygame.display.set_mode((ANCHO, ALTO))
         pygame.display.set_caption("Backgammon")
-        self.clock = pygame.time.Clock()
-        
+        self.__clock__ = pygame.time.Clock()
+
         # Fuentes
-        self.font = pygame.font.SysFont("Arial", 18)
-        self.font_big = pygame.font.SysFont("Arial", 24, bold=True)
-        
-        # Juego
-        self.board = Board()
-        self.white = Player(nombre1, "white")
-        self.black = Player(nombre2, "black")
-        self.dice = Dice()
-        self.game = Game(self.board, self.white, self.black, self.dice)
-        
-        # Estado
-        self.dados_disponibles = []
-        self.punto_seleccionado = None
-        self.mensaje = f"{nombre1}, tirá los dados para empezar"
-        self.color_mensaje = BLANCO
-        
-        # Botones simples
-        self.btn_tirar = pygame.Rect(1020, 100, 150, 40)
-        self.btn_pasar = pygame.Rect(1020, 150, 150, 40)
-        
-        self.running = True
+        self.__font_small__ = pygame.font.SysFont("Arial", 16)
+        self.__font__ = pygame.font.SysFont("Arial", 20)
+        self.__font_big__ = pygame.font.SysFont("Arial", 28, bold=True)
 
-    def posicion_punto(self, idx):
-        """Calcula posición de un punto con espacio en el medio para el bar."""
-        w = 70  # Ancho de cada triángulo (más grande)
-        bar_gap = 80  # Espacio en el medio para el bar
-        
-        if idx < 12:  # Parte superior (puntos 11 a 0)
+        # Lógica del juego
+        self.__board__ = Board()
+        self.__white__ = Player(nombre1, "white")
+        self.__black__ = Player(nombre2, "black")
+        self.__dice__ = Dice()
+        self.__game__ = Game(self.__board__, self.__white__, self.__black__, self.__dice__)
+
+        # Estado UI
+        self.__dados_disponibles__ = []
+        self.__punto_seleccionado__ = None
+        self.__mensaje__ = f"{nombre1}, haz click en 'TIRAR DADOS'"
+        self.__color_mensaje__ = CREMA
+
+        self.__running__ = True
+
+        # Calcular posiciones
+        self.__calcular_geometria__()
+
+    # ==========================
+    # PROPIEDADES (opcional)
+    # ==========================
+    @property
+    def __mensaje(self):
+        return self.__mensaje__
+
+    @property
+    def __color_mensaje(self):
+        return self.__color_mensaje__
+
+    # ==========================
+    # GEOMETRÍA
+    # ==========================
+    def __calcular_geometria__(self):
+        """Calcula todas las posiciones del tablero."""
+        # Área del tablero
+        self.__tablero_x__ = MARGEN
+        self.__tablero_y__ = MARGEN
+        self.__tablero_ancho__ = 12 * ANCHO_TRIANGULO + ESPACIO_BAR
+        self.__tablero_alto__ = 2 * ALTO_TRIANGULO + 60
+
+        # Bar
+        self.__bar_x__ = self.__tablero_x__ + 6 * ANCHO_TRIANGULO
+        self.__bar_y__ = self.__tablero_y__
+        self.__bar_ancho__ = ESPACIO_BAR
+        self.__bar_alto__ = self.__tablero_alto__
+
+        # Panel derecho
+        self.__panel_x__ = self.__tablero_x__ + self.__tablero_ancho__ + 20
+        self.__panel_ancho__ = ANCHO - self.__panel_x__ - MARGEN
+
+        # Botones
+        btn_x = self.__panel_x__ + 10
+        self.__btn_tirar__ = pygame.Rect(btn_x, 80, 180, 45)
+        self.__btn_pasar__ = pygame.Rect(btn_x, 135, 180, 45)
+
+        # Zonas bear-off
+        self.__bearoff_ancho__ = 100
+        self.__bearoff_alto__ = 150
+        # Blancas (derecha abajo)
+        self.__bearoff_white_x__ = self.__tablero_x__ + self.__tablero_ancho__ + 10
+        self.__bearoff_white_y__ = self.__tablero_y__ + self.__tablero_alto__ - self.__bearoff_alto__ - 10
+        # Negras (derecha arriba)
+        self.__bearoff_black_x__ = self.__tablero_x__ + self.__tablero_ancho__ + 10
+        self.__bearoff_black_y__ = self.__tablero_y__ + 10
+
+    # ==========================
+    # CONVERSIONES
+    # ==========================
+    def __punto_a_coords__(self, idx):
+        """Convierte índice de punto a coordenadas (x, y) del centro."""
+        if idx < 0 or idx > 23:
+            return None
+
+        # Calcular columna (0-11)
+        if idx <= 11:  # Superior
             col = 11 - idx
-            if col < 6:  # Derecha (puntos 11-6)
-                x = 50 + col * w + w//2 + bar_gap
-            else:  # Izquierda (puntos 5-0)
-                x = 50 + (col - 6) * w + w//2
-            y = 100
-        else:  # Parte inferior (puntos 12 a 23)
+        else:  # Inferior
             col = idx - 12
-            if col < 6:  # Izquierda (puntos 12-17)
-                x = 50 + col * w + w//2
-            else:  # Derecha (puntos 18-23)
-                x = 50 + (col - 6) * w + w//2 + bar_gap
-            y = 600
-        return (x, y)
 
-    def punto_desde_click(self, pos):
-        """Detecta qué punto se clickeó. Retorna -1 si es el bar, -2 si es zona de bear off."""
-        x, y = pos
-        w = 70
-        bar_gap = 80
-        bar_x_center = 50 + 6*w + bar_gap//2
-        
-        # Verificar si es click en zona de bear off (zona "OUT")
-        if 920 <= x <= 980:
-            if 520 <= y <= 600:  # Zona bear off blancas
+        # Ajustar por el bar
+        if col >= 6:
+            x = (
+                self.__tablero_x__
+                + col * ANCHO_TRIANGULO
+                + ANCHO_TRIANGULO // 2
+                + ESPACIO_BAR
+            )
+        else:
+            x = self.__tablero_x__ + col * ANCHO_TRIANGULO + ANCHO_TRIANGULO // 2
+
+        # Y según si es superior o inferior
+        if idx <= 11:  # Superior
+            y = self.__tablero_y__ + 30
+        else:  # Inferior
+            y = self.__tablero_y__ + self.__tablero_alto__ - 30
+
+        return (int(x), int(y))
+
+    def __coords_a_punto__(self, x, y):
+        """Convierte coordenadas a índice de punto. -1=bar, -2=bearoff, None=nada."""
+        # Bear-off
+        if self.__bearoff_white_x__ <= x <= self.__bearoff_white_x__ + self.__bearoff_ancho__:
+            if self.__bearoff_white_y__ <= y <= self.__bearoff_white_y__ + self.__bearoff_alto__:
                 return -2
-            elif 100 <= y <= 180:  # Zona bear off negras
+        if self.__bearoff_black_x__ <= x <= self.__bearoff_black_x__ + self.__bearoff_ancho__:
+            if self.__bearoff_black_y__ <= y <= self.__bearoff_black_y__ + self.__bearoff_alto__:
                 return -2
-        
-        # Verificar si es click en el bar (área del medio)
-        if abs(x - bar_x_center) <= 40 and 150 <= y <= 550:
-            # Verificar si hay fichas del jugador actual en el bar
-            if self.board.bar_count(self.game.current_player.color) > 0:
-                return -1
-        
-        # Parte superior (puntos 11-0)
-        if 50 <= y <= 350:
-            # Mitad derecha (puntos 11-6)
-            if 50 + bar_gap <= x <= 50 + 6*w + bar_gap:
-                col = (x - (50 + bar_gap)) // w
-                if col < 6:
-                    return 11 - col
-            # Mitad izquierda (puntos 5-0)
-            elif 50 <= x <= 50 + 6*w:
-                col = (x - 50) // w
-                if col < 6:
-                    return 5 - col
-        
-        # Parte inferior (puntos 12-23)
-        elif 400 <= y <= 650:
-            # Mitad izquierda (puntos 12-17)
-            if 50 <= x <= 50 + 6*w:
-                col = (x - 50) // w
-                if col < 6:
-                    return 12 + col
-            # Mitad derecha (puntos 18-23)
-            elif 50 + bar_gap <= x <= 50 + 6*w + bar_gap:
-                col = (x - (50 + bar_gap)) // w
-                if col < 6:
-                    return 18 + col
-        
+
+        # Bar
+        if self.__bar_x__ <= x <= self.__bar_x__ + self.__bar_ancho__:
+            if self.__bar_y__ <= y <= self.__bar_y__ + self.__bar_alto__:
+                if self.__board__.bar_count(self.__game__.current_player.color) > 0:
+                    return -1
+
+        # Puntos del tablero
+        y_medio = self.__tablero_y__ + self.__tablero_alto__ // 2
+
+        if self.__tablero_y__ <= y < y_medio:
+            # SUPERIOR (puntos 11-0)
+            if x < self.__bar_x__:  # IZQUIERDA
+                col = int((x - self.__tablero_x__) // ANCHO_TRIANGULO)
+            elif x >= self.__bar_x__ + self.__bar_ancho__:  # DERECHA
+                col = int((x - self.__bar_x__ - self.__bar_ancho__) // ANCHO_TRIANGULO) + 6
+            else:
+                return None
+
+            if 0 <= col <= 11:
+                idx = 11 - col
+                return idx
+
+        elif y >= y_medio:
+            # INFERIOR (puntos 12-23)
+            if x < self.__bar_x__:  # IZQUIERDA
+                col = int((x - self.__tablero_x__) // ANCHO_TRIANGULO)
+            elif x >= self.__bar_x__ + self.__bar_ancho__:  # DERECHA
+                col = int((x - self.__bar_x__ - self.__bar_ancho__) // ANCHO_TRIANGULO) + 6
+            else:
+                return None
+
+            if 0 <= col <= 11:
+                idx = col + 12
+                return idx
+
         return None
 
-    def calcular_dado_usado(self, move):
-        """Calcula qué dado se usó para un movimiento dado."""
-        # Bear off: formato ("bearoff", src)
-        if isinstance(move, tuple) and move[0] == "bearoff":
-            src = move[1]
-            direction = self.game.current_player.direction
-            
-            # Calcular qué dado se necesita para sacar desde este punto
-            if self.game.current_player.color == "white":
-                # Blancas sacan desde puntos 0-5 hacia "fuera" (negativo)
-                # Punto 0 con dado 1, punto 1 con dado 2, etc.
-                dado_exacto = src + 1
-                # Verificar si el dado exacto está disponible
-                if dado_exacto in self.dados_disponibles:
-                    return dado_exacto
-                # Si no, buscar un dado mayor que también sirva
-                for d in sorted(self.dados_disponibles, reverse=True):
-                    if d > dado_exacto:
-                        return d
-            else:
-                # Negras sacan desde puntos 18-23 hacia "fuera" (>23)
-                # Punto 23 con dado 1, punto 22 con dado 2, etc.
-                dado_exacto = 24 - src
-                if dado_exacto in self.dados_disponibles:
-                    return dado_exacto
-                for d in sorted(self.dados_disponibles, reverse=True):
-                    if d > dado_exacto:
-                        return d
-            return None
-        
-        # Movimiento desde el bar: formato ("reentry", dst)
-        if isinstance(move, tuple) and move[0] == "reentry":
-            dst = move[1]
-            # Para blancas: entran en puntos 18-23 con dados 1-6
-            # Para negras: entran en puntos 0-5 con dados 1-6
-            if self.game.current_player.color == "white":
-                # Blancas entran desde el "punto 24" (fuera) hacia abajo
-                # Dado 1 -> punto 23, Dado 2 -> punto 22, ..., Dado 6 -> punto 18
-                dado = 24 - dst
-            else:
-                # Negras entran desde el "punto -1" (fuera) hacia arriba
-                # Dado 1 -> punto 0, Dado 2 -> punto 1, ..., Dado 6 -> punto 5
-                dado = dst + 1
-            
-            if dado in self.dados_disponibles:
-                return dado
-            return None
-        
-        # Movimiento normal: formato (src, dst)
+    def __calcular_dado_usado__(self, move):
+        """Calcula qué dado se usó."""
         if isinstance(move, tuple) and len(move) == 2:
-            src, dst = move
-            distancia = abs(dst - src)
-            if distancia in self.dados_disponibles:
-                return distancia
-        
+            if isinstance(move[0], int) and isinstance(move[1], int):
+                # Movimiento normal
+                dist = abs(move[1] - move[0])
+                return dist if dist in self.__dados_disponibles__ else None
+            if move[0] == "reentry":
+                # Reingreso
+                dst = move[1]
+                color = self.__game__.current_player.color
+                if color == "white":
+                    dado = 24 - dst
+                else:
+                    dado = dst + 1
+                return dado if dado in self.__dados_disponibles__ else None
+            if move[0] == "bearoff":
+                # Bear-off
+                src = move[1]
+                color = self.__game__.current_player.color
+                if color == "white":
+                    dado = src + 1
+                else:
+                    dado = 24 - src
+                return dado if dado in self.__dados_disponibles__ else None
         return None
 
-    def auto_terminar(self):
-        """Termina el turno automáticamente."""
-        self.game.end_turn()
-        self.dados_disponibles = []
-        self.punto_seleccionado = None
-        self.mensaje = f"Turno de {self.game.current_player.name}"
-        self.color_mensaje = BLANCO
+    # ==========================
+    # DIBUJO
+    # ==========================
+    def __dibujar_tablero__(self):
+        """Dibuja el tablero."""
+        self.__screen__.fill(MARRON_OSCURO)
 
-    def verificar_auto_terminar(self):
-        """Verifica si debe terminar el turno."""
-        if not self.dados_disponibles:
-            self.auto_terminar()
-            return True
-        
-        moves = self.board.legal_moves(self.game.current_player, self.dados_disponibles)
-        if not moves:
-            self.mensaje = "Sin movimientos. Turno terminado."
-            self.color_mensaje = ROJO
-            self.auto_terminar()
-            return True
-        
-        return False
+        # Fondo del tablero
+        pygame.draw.rect(
+            self.__screen__,
+            BEIGE,
+            (
+                self.__tablero_x__,
+                self.__tablero_y__,
+                self.__tablero_ancho__,
+                self.__tablero_alto__,
+            ),
+        )
 
-    def dibujar_tablero(self):
-        """Dibuja el tablero con espacio en el medio para el bar y números."""
-        self.screen.fill(MARRON)
-        
-        w = 70
-        bar_gap = 80
-        
-        # Fondo tablero
-        pygame.draw.rect(self.screen, (100, 60, 20), (30, 30, 900, 680))
-        
-        # Línea del medio
-        pygame.draw.line(self.screen, (80, 40, 10), (30, 360), (930, 360), 4)
-        
-        # Dibujar triángulos y números
+        # Triángulos
         for i in range(24):
-            if i < 12:  # Parte superior (11-0)
-                col = 11 - i
-                if col < 6:  # Derecha
-                    x_base = 50 + col * w + bar_gap
-                else:  # Izquierda
-                    x_base = 50 + (col - 6) * w
-                
-                color = BEIGE if i % 2 == 0 else (90, 50, 15)
-                pts = [
-                    (x_base, 50),
-                    (x_base + w, 50),
-                    (x_base + w//2, 330)
-                ]
-                pygame.draw.polygon(self.screen, color, pts)
-                
-                # Número del punto
-                txt = self.font.render(str(i), True, NEGRO if i % 2 == 0 else BEIGE)
-                self.screen.blit(txt, (x_base + w//2 - 8, 55))
-                
-            else:  # Parte inferior (12-23)
-                col = i - 12
-                if col < 6:  # Izquierda
-                    x_base = 50 + col * w
-                else:  # Derecha
-                    x_base = 50 + (col - 6) * w + bar_gap
-                
-                color = BEIGE if i % 2 == 0 else (90, 50, 15)
-                pts = [
-                    (x_base, 670),
-                    (x_base + w, 670),
-                    (x_base + w//2, 390)
-                ]
-                pygame.draw.polygon(self.screen, color, pts)
-                
-                # Número del punto
-                txt = self.font.render(str(i), True, NEGRO if i % 2 == 0 else BEIGE)
-                self.screen.blit(txt, (x_base + w//2 - 8, 650))
+            self.__dibujar_triangulo__(i)
 
-    def dibujar_fichas(self):
-        """Dibuja las fichas."""
+        # Bar
+        pygame.draw.rect(
+            self.__screen__,
+            MARRON_CLARO,
+            (self.__bar_x__, self.__bar_y__, self.__bar_ancho__, self.__bar_alto__),
+        )
+        txt = self.__font_big__.render("BAR", True, MARRON_TEXTO)
+        txt_rect = txt.get_rect(
+            center=(
+                self.__bar_x__ + self.__bar_ancho__ // 2,
+                self.__bar_y__ + self.__bar_alto__ // 2,
+            )
+        )
+        self.__screen__.blit(txt, txt_rect)
+
+        # Línea divisoria
+        y_medio = self.__tablero_y__ + self.__tablero_alto__ // 2
+        pygame.draw.line(
+            self.__screen__,
+            MARRON_OSCURO,
+            (self.__tablero_x__, y_medio),
+            (self.__tablero_x__ + self.__tablero_ancho__, y_medio),
+            3,
+        )
+
+    def __dibujar_triangulo__(self, idx):
+        """Dibuja un triángulo del tablero."""
+        # Calcular posición
+        if idx <= 11:  # Superior (11→0)
+            col = 11 - idx
+            y_base = self.__tablero_y__
+            y_punta = y_base + ALTO_TRIANGULO
+            hacia_abajo = True
+        else:  # Inferior (12→23)
+            col = idx - 12
+            y_base = self.__tablero_y__ + self.__tablero_alto__
+            y_punta = y_base - ALTO_TRIANGULO
+            hacia_abajo = False
+
+        # Ajustar X por el bar
+        if col >= 6:
+            x_izq = self.__tablero_x__ + col * ANCHO_TRIANGULO + ESPACIO_BAR
+        else:
+            x_izq = self.__tablero_x__ + col * ANCHO_TRIANGULO
+
+        x_der = x_izq + ANCHO_TRIANGULO
+        x_medio = (x_izq + x_der) // 2
+
+        # Puntos del triángulo
+        if hacia_abajo:
+            puntos = [(x_izq, y_base), (x_der, y_base), (x_medio, y_punta)]
+        else:
+            puntos = [(x_izq, y_base), (x_der, y_base), (x_medio, y_punta)]
+
+        # Color alternado (tonos marrones)
+        color = MARRON_TRIANGULO_1 if (idx % 2 == 0) else MARRON_TRIANGULO_2
+        pygame.draw.polygon(self.__screen__, color, puntos)
+        pygame.draw.aalines(self.__screen__, MARRON_OSCURO, True, puntos, 2)
+
+        # Número del punto
+        txt_color = CREMA if color == MARRON_TRIANGULO_2 else MARRON_TEXTO
+        txt = self.__font_small__.render(str(idx), True, txt_color)
+        txt_rect = txt.get_rect(
+            center=(x_medio, y_base + 10 if hacia_abajo else y_base - 10)
+        )
+        self.__screen__.blit(txt, txt_rect)
+
+    def __dibujar_fichas__(self):
+        """Dibuja todas las fichas en el tablero."""
         for idx in range(24):
-            p = self.board.points[idx]
-            if not p or not p.get("color"):
+            cell = self.__board__.points[idx]
+            if not cell:
                 continue
-            
-            x, y = self.posicion_punto(idx)
-            color = BLANCO if p["color"] == "white" else NEGRO
-            cant = p["count"]
-            
-            # Dirección
-            dir_y = 1 if idx < 12 else -1
-            
-            # Dibujar fichas
-            for j in range(min(cant, 5)):
-                pygame.draw.circle(self.screen, color, (x, y + j*40*dir_y), 18)
-                pygame.draw.circle(self.screen, GRIS, (x, y + j*40*dir_y), 18, 2)
-            
-            # Número si >5
-            if cant > 5:
-                txt = self.font_big.render(str(cant), True, ROJO)
-                self.screen.blit(txt, (x-10, y-10))
-        
-        # Selección
-        if self.punto_seleccionado is not None and self.punto_seleccionado >= 0:
-            x, y = self.posicion_punto(self.punto_seleccionado)
-            pygame.draw.circle(self.screen, VERDE, (x, y), 25, 4)
 
-    def dibujar_bar(self):
-        """Dibuja la barra en el medio del tablero."""
-        w = 70
-        bar_gap = 80
-        bar_x = 50 + 6*w + bar_gap//2
-        
-        # Fondo del bar
-        pygame.draw.rect(self.screen, (70, 40, 15), (bar_x - 35, 50, 70, 620), border_radius=10)
-        pygame.draw.line(self.screen, (200, 150, 50), (bar_x - 35, 360), (bar_x + 35, 360), 2)
-        
-        # Texto "BAR"
-        txt_bar = self.font_big.render("BAR", True, (200, 150, 50))
-        self.screen.blit(txt_bar, (bar_x - 25, 350))
-        
-        # Blancas en barra (parte inferior)
-        bar_w = self.board.bar_count("white")
-        if bar_w > 0:
-            y_start = 550
-            for i in range(min(bar_w, 5)):
-                pygame.draw.circle(self.screen, BLANCO, (bar_x, y_start - i*35), 18)
-                pygame.draw.circle(self.screen, GRIS, (bar_x, y_start - i*35), 18, 2)
-            if bar_w > 5:
-                txt = self.font_big.render(str(bar_w), True, ROJO)
-                self.screen.blit(txt, (bar_x-10, 400))
-        
-        # Negras en barra (parte superior)
-        bar_b = self.board.bar_count("black")
-        if bar_b > 0:
-            y_start = 170
-            for i in range(min(bar_b, 5)):
-                pygame.draw.circle(self.screen, NEGRO, (bar_x, y_start + i*35), 18)
-                pygame.draw.circle(self.screen, GRIS, (bar_x, y_start + i*35), 18, 2)
-            if bar_b > 5:
-                txt = self.font_big.render(str(bar_b), True, ROJO)
-                self.screen.blit(txt, (bar_x-10, 320))
-        
-        # Resaltar si está seleccionado
-        if self.punto_seleccionado == -1:
-            pygame.draw.rect(self.screen, VERDE, (bar_x - 35, 50, 70, 620), 4, border_radius=10)
+            coords = self.__punto_a_coords__(idx)
+            if not coords:
+                continue
 
-    def dibujar_borne_off(self):
-        """Dibuja fichas sacadas con zona clickeable."""
-        x = 950
-        
-        # Zona de bear off para blancas (abajo)
-        pygame.draw.rect(self.screen, (100, 80, 60), (x-30, 520, 60, 80), border_radius=8)
-        pygame.draw.rect(self.screen, (200, 180, 140), (x-30, 520, 60, 80), 2, border_radius=8)
-        
-        borne_w = self.board.borne_off_count("white")
-        pygame.draw.rect(self.screen, BLANCO, (x-20, 550, 40, 40), border_radius=5)
-        txt = self.font_big.render(str(borne_w), True, NEGRO)
-        txt_rect = txt.get_rect(center=(x, 570))
-        self.screen.blit(txt, txt_rect)
-        
-        # Texto "OUT"
-        txt_out = self.font.render("OUT", True, (200, 180, 140))
-        self.screen.blit(txt_out, (x-18, 525))
-        
-        # Zona de bear off para negras (arriba)
-        pygame.draw.rect(self.screen, (100, 80, 60), (x-30, 100, 60, 80), border_radius=8)
-        pygame.draw.rect(self.screen, (200, 180, 140), (x-30, 100, 60, 80), 2, border_radius=8)
-        
-        borne_b = self.board.borne_off_count("black")
-        pygame.draw.rect(self.screen, NEGRO, (x-20, 130, 40, 40), border_radius=5)
-        txt = self.font_big.render(str(borne_b), True, BLANCO)
-        txt_rect = txt.get_rect(center=(x, 150))
-        self.screen.blit(txt, txt_rect)
-        
-        # Texto "OUT"
-        txt_out = self.font.render("OUT", True, (200, 180, 140))
-        self.screen.blit(txt_out, (x-18, 160))
+            x, y = coords
+            color = cell["color"]
+            count = cell["count"]
 
-    def dibujar_panel(self):
-        """Dibuja panel lateral."""
+            # Color de la ficha
+            ficha_color = FICHA_CLARA if color == "white" else FICHA_OSCURA
+            borde_color = (30, 30, 30) if color == "white" else (255, 255, 255)
+
+            # Verificar si este punto está seleccionado
+            es_seleccionado = self.__punto_seleccionado__ == idx
+
+            # Dibujar hasta 5 fichas visibles
+            max_visible = min(count, 5)
+            radio = 22
+            espacio = 5
+
+            for i in range(max_visible):
+                if idx <= 11:  # Superior
+                    y_ficha = y + i * (radio * 2 + espacio)
+                else:  # Inferior
+                    y_ficha = y - i * (radio * 2 + espacio)
+
+                # Dibujar ficha
+                pygame.draw.circle(self.__screen__, ficha_color, (x, int(y_ficha)), radio)
+                pygame.draw.circle(self.__screen__, borde_color, (x, int(y_ficha)), radio, 2)
+
+                # Si está seleccionado, dibujar anillo SOLO en la última ficha
+                if es_seleccionado and i == max_visible - 1:
+                    pygame.draw.circle(self.__screen__, OCRE, (x, int(y_ficha)), radio + 4, 4)
+
+            # Número si hay más de 5
+            if count > 5:
+                if idx <= 11:
+                    y_num = y + max_visible * (radio * 2 + espacio)
+                else:
+                    y_num = y - max_visible * (radio * 2 + espacio)
+                txt = self.__font__.render(f"+{count - 5}", True, TERRACOTA)
+                txt_rect = txt.get_rect(center=(x, int(y_num)))
+                self.__screen__.blit(txt, txt_rect)
+
+    def __dibujar_bar__(self):
+        """Dibuja las fichas en la barra."""
+        white_count = self.__board__.bar_count("white")
+        black_count = self.__board__.bar_count("black")
+
+        radio = 22
+        x_bar = self.__bar_x__ + self.__bar_ancho__ // 2
+
+        # Verificar si la barra está seleccionada
+        bar_seleccionado = self.__punto_seleccionado__ == -1
+
+        # Blancas (abajo)
+        if white_count > 0:
+            y_start = self.__bar_y__ + self.__bar_alto__ - 30
+            for i in range(min(white_count, 5)):
+                y = y_start - i * (radio * 2 + 5)
+                pygame.draw.circle(self.__screen__, (255, 255, 255), (x_bar, int(y)), radio)
+                pygame.draw.circle(self.__screen__, (30, 30, 30), (x_bar, int(y)), radio, 2)
+                if (
+                    bar_seleccionado
+                    and self.__game__.current_player.color == "white"
+                    and i == min(white_count, 5) - 1
+                ):
+                    pygame.draw.circle(self.__screen__, OCRE, (x_bar, int(y)), radio + 4, 4)
+            if white_count > 5:
+                txt = self.__font__.render(f"+{white_count - 5}", True, CREMA)
+                txt_rect = txt.get_rect(
+                    center=(x_bar, y_start - 5 * (radio * 2 + 5) - 20)
+                )
+                self.__screen__.blit(txt, txt_rect)
+
+        # Negras (arriba)
+        if black_count > 0:
+            y_start = self.__bar_y__ + 30
+            for i in range(min(black_count, 5)):
+                y = y_start + i * (radio * 2 + 5)
+                pygame.draw.circle(self.__screen__, (30, 30, 30), (x_bar, int(y)), radio)
+                pygame.draw.circle(self.__screen__, (255, 255, 255), (x_bar, int(y)), radio, 2)
+                if (
+                    bar_seleccionado
+                    and self.__game__.current_player.color == "black"
+                    and i == min(black_count, 5) - 1
+                ):
+                    pygame.draw.circle(self.__screen__, OCRE, (x_bar, int(y)), radio + 4, 4)
+            if black_count > 5:
+                txt = self.__font__.render(f"+{black_count - 5}", True, CREMA)
+                txt_rect = txt.get_rect(
+                    center=(x_bar, y_start + 5 * (radio * 2 + 5) + 20)
+                )
+                self.__screen__.blit(txt, txt_rect)
+
+    def __dibujar_bearoff__(self):
+        """Dibuja las zonas de bear-off."""
+        # Blancas
+        pygame.draw.rect(
+            self.__screen__,
+            MARRON_MEDIO,
+            (
+                self.__bearoff_white_x__,
+                self.__bearoff_white_y__,
+                self.__bearoff_ancho__,
+                self.__bearoff_alto__,
+            ),
+            border_radius=10,
+        )
+        pygame.draw.rect(
+            self.__screen__,
+            BEIGE_CLARO,
+            (
+                self.__bearoff_white_x__,
+                self.__bearoff_white_y__,
+                self.__bearoff_ancho__,
+                self.__bearoff_alto__,
+            ),
+            3,
+            border_radius=10,
+        )
+
+        white_off = self.__board__.borne_off_count("white")
+        txt_w = self.__font_big__.render(str(white_off), True, CREMA)
+        txt_rect_w = txt_w.get_rect(
+            center=(
+                self.__bearoff_white_x__ + self.__bearoff_ancho__ // 2,
+                self.__bearoff_white_y__ + self.__bearoff_alto__ // 2,
+            )
+        )
+        self.__screen__.blit(txt_w, txt_rect_w)
+
+        # Negras
+        pygame.draw.rect(
+            self.__screen__,
+            MARRON_MEDIO,
+            (
+                self.__bearoff_black_x__,
+                self.__bearoff_black_y__,
+                self.__bearoff_ancho__,
+                self.__bearoff_alto__,
+            ),
+            border_radius=10,
+        )
+        pygame.draw.rect(
+            self.__screen__,
+            MARRON_OSCURO,
+            (
+                self.__bearoff_black_x__,
+                self.__bearoff_black_y__,
+                self.__bearoff_ancho__,
+                self.__bearoff_alto__,
+            ),
+            3,
+            border_radius=10,
+        )
+
+        black_off = self.__board__.borne_off_count("black")
+        txt_b = self.__font_big__.render(str(black_off), True, MARRON_OSCURO)
+        txt_rect_b = txt_b.get_rect(
+            center=(
+                self.__bearoff_black_x__ + self.__bearoff_ancho__ // 2,
+                self.__bearoff_black_y__ + self.__bearoff_alto__ // 2,
+            )
+        )
+        self.__screen__.blit(txt_b, txt_rect_b)
+
+    def __dibujar_panel__(self):
+        """Dibuja el panel lateral."""
         # Fondo
-        pygame.draw.rect(self.screen, (70, 50, 30), (1000, 0, 200, ALTO))
-        
-        # Turno
-        p = self.game.current_player
-        emoji = "⚪" if p.color == "white" else "⚫"
-        txt = self.font_big.render(f"{emoji} {p.name}", True, BLANCO)
-        self.screen.blit(txt, (1020, 30))
-        
-        # Botón tirar
-        self.btn_tirar = pygame.Rect(1020, 100, 150, 40)
-        color_btn = VERDE if not self.dados_disponibles else GRIS
-        pygame.draw.rect(self.screen, color_btn, self.btn_tirar, border_radius=5)
-        txt = self.font.render("TIRAR DADOS", True, BLANCO)
-        self.screen.blit(txt, (self.btn_tirar.x + 20, self.btn_tirar.y + 12))
-        
-        # Botón pasar
-        self.btn_pasar = pygame.Rect(1020, 150, 150, 40)
-        color_btn2 = ROJO if self.dados_disponibles else GRIS
-        pygame.draw.rect(self.screen, color_btn2, self.btn_pasar, border_radius=5)
-        txt = self.font.render("PASAR TURNO", True, BLANCO)
-        self.screen.blit(txt, (self.btn_pasar.x + 18, self.btn_pasar.y + 12))
-        
+        pygame.draw.rect(self.__screen__, CAFE, (self.__panel_x__, 0, self.__panel_ancho__, ALTO))
+
+        # Título
+        txt_titulo = self.__font_big__.render("BACKGAMMON", True, DORADO_SUAVE)
+        self.__screen__.blit(txt_titulo, (self.__panel_x__ + 10, 20))
+
+        # Turno actual
+        txt_turno = self.__font__.render(
+            f"Turno: {self.__game__.current_player.name}", True, CREMA
+        )
+        self.__screen__.blit(txt_turno, (self.__panel_x__ + 10, 55))
+
+        # Botones
+        pygame.draw.rect(self.__screen__, CHOCOLATE, self.__btn_tirar__, border_radius=5)
+        txt_btn1 = self.__font__.render("TIRAR DADOS", True, CREMA)
+        txt_rect1 = txt_btn1.get_rect(center=self.__btn_tirar__.center)
+        self.__screen__.blit(txt_btn1, txt_rect1)
+
+        color_pasar = MARRON_MEDIO if self.__dados_disponibles__ else MARRON_OSCURO
+        pygame.draw.rect(self.__screen__, color_pasar, self.__btn_pasar__, border_radius=5)
+        txt_btn2 = self.__font__.render("PASAR TURNO", True, CREMA)
+        txt_rect2 = txt_btn2.get_rect(center=self.__btn_pasar__.center)
+        self.__screen__.blit(txt_btn2, txt_rect2)
+
         # Dados disponibles
-        if self.dados_disponibles:
-            y = 220
-            self.screen.blit(self.font.render("Dados disponibles:", True, VERDE), (1020, y))
-            
-            for i, d in enumerate(self.dados_disponibles):
-                x = 1030 + (i % 2) * 60
-                y_d = 250 + (i // 2) * 60
-                pygame.draw.rect(self.screen, VERDE, (x, y_d, 40, 40), border_radius=5)
-                txt = self.font_big.render(str(d), True, BLANCO)
-                self.screen.blit(txt, (x+12, y_d+8))
-            
-            # Dados usados
-            if len(self.dados_disponibles) < len(self.game.last_roll or []):
-                y_us = 420
-                self.screen.blit(self.font.render("Usados:", True, GRIS), (1020, y_us))
-                
-                usados = [d for d in (self.game.last_roll or []) if d not in self.dados_disponibles]
-                for i, d in enumerate(usados):
-                    x = 1030 + (i % 2) * 60
-                    y_d = 450 + (i // 2) * 60
-                    pygame.draw.rect(self.screen, GRIS, (x, y_d, 40, 40), border_radius=5)
-                    txt = self.font.render(str(d), True, NEGRO)
-                    self.screen.blit(txt, (x+12, y_d+10))
-                    # Tachado
-                    pygame.draw.line(self.screen, ROJO, (x, y_d), (x+40, y_d+40), 3)
-        
+        if self.__dados_disponibles__:
+            y = 200
+            txt_dados = self.__font__.render("Dados disponibles:", True, CREMA)
+            self.__screen__.blit(txt_dados, (self.__panel_x__ + 10, y))
+
+            for i, d in enumerate(self.__dados_disponibles__):
+                x = self.__panel_x__ + 15 + (i % 2) * 65
+                y_dado = y + 35 + (i // 2) * 65
+                pygame.draw.rect(
+                    self.__screen__, TERRACOTA, (x, y_dado, 55, 55), border_radius=5
+                )
+                txt_dado = self.__font_big__.render(str(d), True, CREMA)
+                txt_rect = txt_dado.get_rect(center=(x + 27, y_dado + 27))
+                self.__screen__.blit(txt_dado, txt_rect)
+
         # Mensaje
-        y_msg = 600
-        palabras = self.mensaje.split()
+        y_msg = 450
+        palabras = self.__mensaje__.split()
         linea = ""
         y_actual = y_msg
-        
+
         for palabra in palabras:
             test = linea + palabra + " "
-            if self.font.size(test)[0] < 180:
+            if self.__font__.size(test)[0] < self.__panel_ancho__ - 20:
                 linea = test
             else:
                 if linea:
-                    txt = self.font.render(linea, True, self.color_mensaje)
-                    self.screen.blit(txt, (1010, y_actual))
-                    y_actual += 20
+                    txt = self.__font__.render(linea, True, self.__color_mensaje__)
+                    self.__screen__.blit(txt, (self.__panel_x__ + 10, y_actual))
+                    y_actual += 25
                 linea = palabra + " "
-        
-        if linea:
-            txt = self.font.render(linea, True, self.color_mensaje)
-            self.screen.blit(txt, (1010, y_actual))
 
-    def manejar_click(self, pos):
-        """Maneja clicks."""
-        # Botón tirar
-        if self.btn_tirar.collidepoint(pos):
-            if not self.dados_disponibles:
-                valores = self.game.roll_dice()
-                self.dados_disponibles = list(valores)
-                
-                moves = self.board.legal_moves(self.game.current_player, self.dados_disponibles)
+        if linea:
+            txt = self.__font__.render(linea, True, self.__color_mensaje__)
+            self.__screen__.blit(txt, (self.__panel_x__ + 10, y_actual))
+
+        # Ganador
+        if self.__game__.winner:
+            overlay = pygame.Surface((ANCHO, ALTO))
+            overlay.set_alpha(200)
+            overlay.fill((50, 30, 10))
+            self.__screen__.blit(overlay, (0, 0))
+
+            txt = self.__font_big__.render(
+                f"¡{self.__game__.winner.name} GANÓ!", True, DORADO_SUAVE
+            )
+            txt_rect = txt.get_rect(center=(ANCHO // 2, ALTO // 2))
+            self.__screen__.blit(txt, txt_rect)
+
+    # ==========================
+    # INPUT
+    # ==========================
+    def __manejar_click__(self, x, y):
+        """Maneja clicks del mouse."""
+        if self.__game__.winner:
+            return
+
+        # Botón tirar dados
+        if self.__btn_tirar__.collidepoint(x, y):
+            if not self.__dados_disponibles__:
+                valores = self.__game__.roll_dice()
+                self.__dados_disponibles__ = list(valores)
+                moves = self.__board__.legal_moves(
+                    self.__game__.current_player, self.__dados_disponibles__
+                )
+
                 if not moves:
-                    self.mensaje = "Sin movimientos. Turno terminado."
-                    self.color_mensaje = ROJO
-                    self.auto_terminar()
+                    self.__mensaje__ = "Sin movimientos. Auto-pasando turno..."
+                    self.__color_mensaje__ = MARRON_ROJIZO
+                    self.__game__.end_turn()
+                    self.__dados_disponibles__ = []
                 else:
-                    # Verificar si hay fichas en el bar
-                    bar_count = self.board.bar_count(self.game.current_player.color)
+                    bar_count = self.__board__.bar_count(self.__game__.current_player.color)
                     if bar_count > 0:
-                        self.mensaje = f"Dados: {valores}. ¡Sacá del BAR primero!"
-                        self.color_mensaje = (255, 165, 0)  # Naranja
+                        self.__mensaje__ = f"Dados: {valores}. ¡Saca del BAR!"
+                        self.__color_mensaje__ = TERRACOTA
                     else:
-                        self.mensaje = f"Dados: {valores}. Movete!"
-                        self.color_mensaje = VERDE
+                        self.__mensaje__ = f"Dados: {valores}. ¡Mueve!"
+                        self.__color_mensaje__ = OCRE
             return
-        
-        # Botón pasar
-        if self.btn_pasar.collidepoint(pos):
-            if self.dados_disponibles:
-                self.auto_terminar()
+
+        # Botón pasar turno
+        if self.__btn_pasar__.collidepoint(x, y):
+            if self.__dados_disponibles__:
+                self.__game__.end_turn()
+                self.__dados_disponibles__ = []
+                self.__punto_seleccionado__ = None
+                self.__mensaje__ = f"Turno de {self.__game__.current_player.name}"
+                self.__color_mensaje__ = CREMA
             return
-        
-        # Click en tablero
-        if not self.dados_disponibles:
+
+        # Clicks en el tablero
+        if not self.__dados_disponibles__:
             return
-        
-        punto = self.punto_desde_click(pos)
+
+        punto = self.__coords_a_punto__(x, y)
         if punto is None:
             return
-        
-        # Verificar si hay fichas en el bar
-        bar_count = self.board.bar_count(self.game.current_player.color)
-        
-        # Seleccionar
-        if self.punto_seleccionado is None:
-            # Si hay fichas en el bar, SOLO se puede seleccionar el bar
+
+        bar_count = self.__board__.bar_count(self.__game__.current_player.color)
+
+        # Primera selección
+        if self.__punto_seleccionado__ is None:
             if bar_count > 0:
                 if punto == -1:
-                    self.punto_seleccionado = -1
-                    self.mensaje = "Bar seleccionado. Click donde quieras entrar"
-                    self.color_mensaje = AZUL
+                    self.__punto_seleccionado__ = -1
+                    self.__mensaje__ = "BAR seleccionado. Click destino"
+                    self.__color_mensaje__ = OCRE
                 else:
-                    self.mensaje = "¡Primero sacá del BAR!"
-                    self.color_mensaje = ROJO
+                    self.__mensaje__ = "¡Primero saca del BAR!"
+                    self.__color_mensaje__ = MARRON_ROJIZO
             else:
-                # No hay fichas en el bar, movimiento normal
                 if punto == -1:
-                    self.mensaje = "El bar está vacío"
-                    self.color_mensaje = ROJO
+                    self.__mensaje__ = "BAR vacío"
+                    self.__color_mensaje__ = MARRON_ROJIZO
+                elif punto == -2:
+                    self.__mensaje__ = "Selecciona una ficha primero"
+                    self.__color_mensaje__ = MARRON_ROJIZO
                 else:
-                    p = self.board.points[punto]
-                    if p and p["color"] == self.game.current_player.color:
-                        self.punto_seleccionado = punto
-                        self.mensaje = f"Punto {punto} seleccionado"
-                        self.color_mensaje = AZUL
+                    cell = self.__board__.points[punto]
+                    if cell and cell["color"] == self.__game__.current_player.color:
+                        self.__punto_seleccionado__ = punto
+                        self.__mensaje__ = f"Punto {punto} seleccionado. Click destino"
+                        self.__color_mensaje__ = OCRE
+                    else:
+                        if cell:
+                            self.__mensaje__ = f"Punto {punto} no es tuyo"
+                        else:
+                            self.__mensaje__ = f"Punto {punto} está vacío"
+                        self.__color_mensaje__ = MARRON_ROJIZO
         else:
-            # Intentar mover
-            moves = self.board.legal_moves(self.game.current_player, self.dados_disponibles)
-            
-            # Crear el movimiento en el formato correcto
-            if self.punto_seleccionado == -1:
-                # Movimiento desde el bar: formato ("reentry", destino)
+            # Segunda selección (movimiento)
+            moves = self.__board__.legal_moves(
+                self.__game__.current_player, self.__dados_disponibles__
+            )
+
+            # Construir movimiento
+            if self.__punto_seleccionado__ == -1:
                 move = ("reentry", punto)
             else:
-                # Si click en zona de bear off (-2) o doble click, intentar bear off
-                bearoff_move = ("bearoff", self.punto_seleccionado)
-                if bearoff_move in moves and (punto == -2 or punto == self.punto_seleccionado):
+                bearoff_move = ("bearoff", self.__punto_seleccionado__)
+                if bearoff_move in moves and (punto == -2 or punto == self.__punto_seleccionado__):
                     move = bearoff_move
                 else:
-                    # Movimiento normal: formato (origen, destino)
-                    move = (self.punto_seleccionado, punto)
-            
+                    move = (self.__punto_seleccionado__, punto)
+
+            # Ejecutar si es legal
             if move in moves:
                 try:
-                    dado = self.calcular_dado_usado(move)
-                    
-                    if dado:
-                        self.game.make_move(move)
-                        self.dados_disponibles.remove(dado)
-                        
-                        # Mensaje según tipo de movimiento
-                        if isinstance(move, tuple) and move[0] == "bearoff":
-                            self.mensaje = f"✓ Sacaste ficha del punto {move[1]} (dado {dado})"
-                        elif isinstance(move, tuple) and move[0] == "reentry":
-                            self.mensaje = f"✓ BAR→{punto} (dado {dado})"
-                        else:
-                            self.mensaje = f"✓ {self.punto_seleccionado}→{punto} (dado {dado})"
-                        
-                        self.color_mensaje = VERDE
-                        
-                        if self.game.winner:
-                            self.mensaje = f"¡{self.game.winner.name} GANÓ!"
-                            self.color_mensaje = VERDE
-                        
-                        self.punto_seleccionado = None
-                        self.verificar_auto_terminar()
-                    else:
-                        self.mensaje = "No se puede calcular el dado"
-                        self.color_mensaje = ROJO
-                        self.punto_seleccionado = None
-                        
-                except BackgammonError as e:
-                    self.mensaje = f"Error: {str(e)[:40]}"
-                    self.color_mensaje = ROJO
-                    self.punto_seleccionado = None
-            else:
-                self.mensaje = "Movimiento ilegal"
-                self.color_mensaje = ROJO
-                self.punto_seleccionado = None
+                    dado = self.__calcular_dado_usado__(move)
+                    if dado and dado in self.__dados_disponibles__:
+                        self.__game__.make_move(move)
+                        self.__dados_disponibles__.remove(dado)
 
+                        if isinstance(move, tuple) and move[0] == "bearoff":
+                            self.__mensaje__ = f"Sacaste del punto {move[1]}"
+                        elif isinstance(move, tuple) and move[0] == "reentry":
+                            self.__mensaje__ = f"BAR → punto {punto}"
+                        else:
+                            self.__mensaje__ = (
+                                f"Punto {self.__punto_seleccionado__} → {punto}"
+                            )
+
+                        self.__color_mensaje__ = OCRE
+                        self.__punto_seleccionado__ = None
+
+                        # Verificar ganador
+                        if self.__game__.winner:
+                            self.__mensaje__ = f"¡{self.__game__.winner.name} GANÓ!"
+                            self.__color_mensaje__ = DORADO_SUAVE
+                        # Auto-terminar si no hay dados
+                        elif not self.__dados_disponibles__:
+                            self.__game__.end_turn()
+                            self.__mensaje__ = f"Turno de {self.__game__.current_player.name}"
+                            self.__color_mensaje__ = CREMA
+                        # Auto-terminar si no hay movimientos
+                        else:
+                            moves = self.__board__.legal_moves(
+                                self.__game__.current_player, self.__dados_disponibles__
+                            )
+                            if not moves:
+                                self.__game__.end_turn()
+                                self.__dados_disponibles__ = []
+                                self.__mensaje__ = "Sin más movimientos"
+                                self.__color_mensaje__ = MARRON_ROJIZO
+                    else:
+                        self.__mensaje__ = "Error calculando dado"
+                        self.__color_mensaje__ = MARRON_ROJIZO
+                        self.__punto_seleccionado__ = None
+                except BackgammonError as exc:
+                    self.__mensaje__ = f"Error: {str(exc)[:30]}"
+                    self.__color_mensaje__ = MARRON_ROJIZO
+                    self.__punto_seleccionado__ = None
+            else:
+                self.__mensaje__ = "Movimiento ilegal"
+                self.__color_mensaje__ = MARRON_ROJIZO
+                self.__punto_seleccionado__ = None
+
+    # ==========================
+    # LOOP PRINCIPAL
+    # ==========================
     def run(self):
         """Loop principal."""
-        while self.running:
+        while self.__running__:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.running = False
+                    self.__running__ = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    self.manejar_click(event.pos)
-            
-            self.dibujar_tablero()
-            self.dibujar_fichas()
-            self.dibujar_bar()
-            self.dibujar_borne_off()
-            self.dibujar_panel()
-            
+                    self.__manejar_click__(*event.pos)
+
+            self.__dibujar_tablero__()
+            self.__dibujar_fichas__()
+            self.__dibujar_bar__()
+            self.__dibujar_bearoff__()
+            self.__dibujar_panel__()
+
             pygame.display.flip()
-            self.clock.tick(FPS)
-        
+            self.__clock__.tick(FPS)
+
         pygame.quit()
         sys.exit()
 
 
 def main():
-    """Función principal."""
-    # Pedir nombres por consola (más simple y funciona siempre)
     nombre1, nombre2 = pedir_nombres()
-    
-    # Crear e iniciar el juego
-    juego = BackgammonSimple(nombre1, nombre2)
+    juego = BackgammonUI(nombre1, nombre2)
     juego.run()
 
 
